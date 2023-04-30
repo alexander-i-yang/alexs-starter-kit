@@ -24,9 +24,9 @@ namespace ASK.UI
 
         IEnumerator FadeInRoutine()
         {
-            yield return new WaitForSeconds(delay / Game.Instance.TimeScale);
+            yield return new WaitForSeconds(delay / Game.TimeManager.TimeScale);
             canvGroup.interactable = true;
-            for (float t = 0; t < len; t += Game.Instance.DeltaTime)
+            for (float t = 0; t < len; t += Game.TimeManager.DeltaTime)
             {
                 float a = curve.Evaluate(t / len);
                 canvGroup.alpha = a;

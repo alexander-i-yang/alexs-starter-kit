@@ -1,7 +1,8 @@
 using System;
 using UnityEngine;
+using ASK.ScreenShake;
 
-namespace ASK.ScreenShake
+namespace ASK.Core
 {
     public class CameraController : MonoBehaviour
     {

@@ -55,7 +55,7 @@ namespace ASK.UI
         {
             if (running)
             {
-                _curTime = Game.Instance.Time;
+                _curTime = Game.TimeManager.Time;
                 _text.text = GetText(_curTime, _bestTimeStr);
             }
         }

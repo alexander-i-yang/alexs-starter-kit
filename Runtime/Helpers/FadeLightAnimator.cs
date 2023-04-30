@@ -57,7 +57,7 @@ namespace ASK.Helpers
             float t = 0f;
             while (t <= animTime)
             {
-                t += Game.Instance.DeltaTime;
+                t += Game.TimeManager.DeltaTime;
                 float s = animCurve.Evaluate(t/animTime);
                 _light2D.intensity = Mathf.Lerp(startI, endI, s);
                 yield return null;

@@ -18,7 +18,7 @@ namespace ASK.Animation
             {
                 Vector2 newPos = curve.Evaluate(Mathf.Clamp01(t));
                 go.transform.position = newPos;
-                t += Game.Instance.DeltaTime * animSpeed;
+                t += Game.TimeManager.DeltaTime * animSpeed;
                 yield return null;
             }
 

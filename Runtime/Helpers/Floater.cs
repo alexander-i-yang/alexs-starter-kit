@@ -15,7 +15,7 @@ namespace ASK.Helpers
             // Float up/down with a Sin()
             Vector3 tempPos = transform.parent.position;
             tempPos.y += Mathf.Sin (
-                Game.Instance.Time * Mathf.PI * frequency +
+                Game.TimeManager.Time * Mathf.PI * frequency +
                 tempPos.x * 0.1f + tempPos.y * 0.1f
             ) * amplitude;
  

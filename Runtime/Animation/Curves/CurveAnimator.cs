@@ -38,7 +38,7 @@ namespace ASK.Animation
 
         private IEnumerator AnimateCurve(System.Action<float> hook)
         {
-            for (float t = 0; t <= 1f; t += Game.Instance.DeltaTime * _curveProvider.GetAnimSpeed())
+            for (float t = 0; t <= 1f; t += Game.TimeManager.DeltaTime * _curveProvider.GetAnimSpeed())
             {
                 Vector2 newPos = GetWorldPos(_animCurve.Evaluate(Mathf.Clamp01(t)));
                 _target.transform.position = new Vector3(newPos.x, newPos.y, _target.transform.position.z);

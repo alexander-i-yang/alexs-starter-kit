@@ -113,7 +113,7 @@ namespace ASK.Core
         {
             if (!Finished() && !_paused)
             {
-                TimerValue -= Game.Instance.DeltaTime;
+                TimerValue -= Game.TimeManager.DeltaTime;
                 FilterLogger.Log(this, $"{_name}: {TimerValue}");
 
                 if (Finished())
@@ -128,7 +128,7 @@ namespace ASK.Core
         {
             if (!Finished() && !_paused)
             {
-                TimerValue -= Game.Instance.FixedDeltaTime;
+                TimerValue -= Game.TimeManager.FixedDeltaTime;
                 FilterLogger.Log(this, $"{_name}: {TimerValue}");
             }
         }
