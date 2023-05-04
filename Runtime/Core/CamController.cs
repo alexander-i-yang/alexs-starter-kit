@@ -4,6 +4,7 @@ using ASK.ScreenShake;
 
 namespace ASK.Core
 {
+    [RequireComponent(typeof(ScreenShakeManager))]
     public class CameraController : MonoBehaviour
     {
         private Camera _mainCamera;
