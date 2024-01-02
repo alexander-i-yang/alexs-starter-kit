@@ -61,7 +61,7 @@ namespace ASK.UI
         {
             var cmdArr = cmd.Split(" ");
             double scale = Convert.ToDouble(cmdArr[1]);
-            Game.TimeManager.SetTimeScale((float)scale);
+            Game.TimeManager.TimeScale = (float)scale;
         }
     }
 }
