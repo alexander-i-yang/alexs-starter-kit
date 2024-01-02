@@ -14,7 +14,7 @@ namespace ASK.Core
                 _timeScale = value;
                 OnTimeScaleChange?.Invoke();
             }
-        };
+        }
         
         public event Action OnTimeScaleChange;
         
