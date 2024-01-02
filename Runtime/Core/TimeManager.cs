@@ -9,7 +9,7 @@ namespace ASK.Core
         public float TimeScale
         {
             get { return _timeScale; }
-            public set
+            set
             {
                 _timeScale = value;
                 OnTimeScaleChange?.Invoke();
