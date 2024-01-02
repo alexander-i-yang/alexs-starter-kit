@@ -6,6 +6,8 @@ namespace ASK.Core
     public class TimeManager : MonoBehaviour
     {
         private float _timeScale;
+
+        [field: SerializeField]
         public float TimeScale
         {
             get { return _timeScale; }
@@ -14,7 +16,7 @@ namespace ASK.Core
                 _timeScale = value;
                 OnTimeScaleChange?.Invoke();
             }
-        }
+        } = 1;
         
         public event Action OnTimeScaleChange;
         
