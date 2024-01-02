@@ -47,7 +47,7 @@ namespace ASK.UI
         Game.Instance.OnDebugEvent -= OnPause;
     }
 
-    protected virtual void OnPausePressed()
+    public virtual void OnPausePressed()
     {
         SetPaused(!Paused);
     }
