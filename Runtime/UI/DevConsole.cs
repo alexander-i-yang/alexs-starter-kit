@@ -12,8 +12,6 @@ namespace ASK.UI
 
         [SerializeField] private GameObject objToShow;
 
-        // public abstract String[] Commands() => new []{"give", "teleport", "time"};
-        // public virtual Action<string>[] CommandActions() => {Give, Teleport, TimeScale};
         public abstract String[] Commands();
         public abstract Action<string>[] CommandActions();
 
@@ -59,7 +57,7 @@ namespace ASK.UI
             PlayerCore.Actor.transform.position = new Vector3(x, y);
         }*/
 
-        static void TimeScale(string cmd)
+        protected void TimeScale(string cmd)
         {
             var cmdArr = cmd.Split(" ");
             double scale = Convert.ToDouble(cmdArr[1]);
