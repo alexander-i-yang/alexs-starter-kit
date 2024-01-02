@@ -4,7 +4,15 @@ namespace ASK.Core
 {
     public class TimeManager : MonoBehaviour
     {
-        public float TimeScale = 1;
+        public float TimeScale { get; private set; } = 1;
+        public event Action OnTimeScaleChange;
+    
+        public void SetTimeScale(float t)
+        {
+            TimeScale = t;
+            OnTimeScaleChange?.Invoke();
+        }
+        
 
         public float DeltaTime { get; private set; }
         public float FixedDeltaTime { get; private set; }
