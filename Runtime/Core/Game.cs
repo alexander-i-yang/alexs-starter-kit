@@ -19,7 +19,7 @@ namespace ASK.Core
 
         // public static float Time => Instance._timeManager.Time;
         private TimeManager _timeManager;
-        public static TimeManager TimeManager => Instance._timeManager;
+        public static TimeManager TimeManager => Instance == null ? null : Instance._timeManager;
 
         private bool _isDebug;
         public bool IsDebug

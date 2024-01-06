@@ -22,7 +22,7 @@ namespace ASK.UI
         
         private void OnDisable()
         {
-            Game.Instance.OnDebugEvent -= Show;
+            if (Game.Instance != null) Game.Instance.OnDebugEvent -= Show;
         }
 
         public void ProcessCommand(string cmd) {
