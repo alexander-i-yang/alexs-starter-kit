@@ -1,6 +1,6 @@
 {
   "name": "com.theuncleofmistersir.alexs-starter-kit",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A small core library of scripts to help Alex make games faster.",
   "displayName": "Alex's Starter Kit",
   "unity": "2021.3",

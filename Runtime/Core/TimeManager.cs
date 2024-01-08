@@ -3,23 +3,12 @@ using System;
 
 namespace ASK.Core
 {
+    [RequireComponent(typeof(Timescaler))]
     public class TimeManager : MonoBehaviour
     {
         private float _timeScale = 1f;
 
-        [field: SerializeField]
-        public float TimeScale
-        {
-            get { return _timeScale; }
-            set
-            {
-                _timeScale = value;
-                OnTimeScaleChange?.Invoke();
-            }
-        }
-        
-        public event Action OnTimeScaleChange;
-        
+        public float TimeScale => _timescaler.Working;
 
         public float DeltaTime { get; private set; }
         public float FixedDeltaTime { get; private set; }
@@ -32,6 +21,15 @@ namespace ASK.Core
         
         public delegate void ResetNFOAction();
         public event ResetNFOAction ResetNextFrameOffset;
+        public event Action OnTimeScaleChange;
+
+        private Timescaler _timescaler;
+
+        private void Awake()
+        {
+            _timescaler = GetComponent<Timescaler>();
+            _timescaler.ApplyTimescale(1, -1);
+        }
 
         private void Update()
         {
@@ -46,6 +44,18 @@ namespace ASK.Core
             
             if (DebugBreak && _frameCount % stepFrames == 0) Debug.Break();
             _frameCount = (_frameCount + 1) % 10000;
+        }
+
+        public Timescaler.TimeScale ApplyTimescale(float f, int priority)
+        {
+            OnTimeScaleChange?.Invoke();
+            return _timescaler.ApplyTimescale(f, priority);
+        }
+
+        public void RemoveTimescale(Timescaler.TimeScale t)
+        {
+            OnTimeScaleChange?.Invoke();
+            _timescaler.RemoveTimescale(t);
         }
     }
 }

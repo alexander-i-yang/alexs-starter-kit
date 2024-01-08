@@ -60,8 +60,8 @@ namespace ASK.UI
         protected void TimeScale(string cmd)
         {
             var cmdArr = cmd.Split(" ");
-            double scale = Convert.ToDouble(cmdArr[1]);
-            Game.TimeManager.TimeScale = (float)scale;
+            float scale = (float)Convert.ToDouble(cmdArr[1]);
+            Game.TimeManager.ApplyTimescale(scale, 0);
         }
     }
 }
