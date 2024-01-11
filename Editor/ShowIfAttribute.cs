@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-namespace Editor
+namespace ASK.Editor
 {
     public enum ActionOnConditionFail
     {
