@@ -20,6 +20,9 @@ namespace ASK.Core
         // public static float Time => Instance._timeManager.Time;
         private TimeManager _timeManager;
         public static TimeManager TimeManager => Instance == null ? null : Instance._timeManager;
+        
+        private ParticlePool _particlePool;
+        public static ParticlePool ParticlePool => Instance._particlePool;
 
         private bool _isDebug;
         public bool IsDebug
@@ -47,6 +50,7 @@ namespace ASK.Core
             // FMODUnity.RuntimeManager.LoadBank("Master", true);
             CamController = GetComponent<CameraController>();
             _timeManager = GetComponent<TimeManager>();
+            _particlePool = GetComponent<ParticlePool>();
         }
 
         public static void Quit()
