@@ -4,7 +4,7 @@ using MyBox;
 
 namespace ASK.Core
 {
-    [RequireComponent(typeof(CameraController), typeof(TimeManager))]
+    [RequireComponent(typeof(CameraController), typeof(TimeManager), typeof(ParticlePool))]
     public class Game : Singleton<Game>
     {
         [SerializeField] private string musicName;
