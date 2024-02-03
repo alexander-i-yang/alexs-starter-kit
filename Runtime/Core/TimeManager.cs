@@ -6,9 +6,9 @@ namespace ASK.Core
     [RequireComponent(typeof(Timescaler))]
     public class TimeManager : MonoBehaviour
     {
-        private float _timeScale = 1f;
+        // public virtual float TimeScale => _timescaler.Working;
 
-        public float TimeScale => _timescaler.Working;
+        public virtual float GetTimeScale() => _timescaler.Working;
 
         public float DeltaTime { get; private set; }
         public float FixedDeltaTime { get; private set; }
@@ -33,14 +33,14 @@ namespace ASK.Core
 
         private void Update()
         {
-            DeltaTime = Game.Instance.IsPaused ? 0 : UnityEngine.Time.deltaTime * TimeScale;
+            DeltaTime = Game.Instance.IsPaused ? 0 : UnityEngine.Time.deltaTime * GetTimeScale();
             Time += DeltaTime;
         }
         
         private void FixedUpdate()
         {
             if (ResetNextFrameOffset != null) ResetNextFrameOffset();
-            FixedDeltaTime = Game.Instance.IsPaused ? 0 : UnityEngine.Time.fixedDeltaTime * TimeScale;
+            FixedDeltaTime = Game.Instance.IsPaused ? 0 : UnityEngine.Time.fixedDeltaTime * GetTimeScale();
             
             if (DebugBreak && _frameCount % stepFrames == 0) Debug.Break();
             _frameCount = (_frameCount + 1) % 10000;

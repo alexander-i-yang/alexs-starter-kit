@@ -24,7 +24,7 @@ namespace ASK.UI
 
         IEnumerator FadeInRoutine()
         {
-            yield return new WaitForSeconds(delay / Game.TimeManager.TimeScale);
+            yield return new WaitForSeconds(delay / Game.TimeManager.GetTimeScale());
             canvGroup.interactable = true;
             for (float t = 0; t < len; t += Game.TimeManager.DeltaTime)
             {

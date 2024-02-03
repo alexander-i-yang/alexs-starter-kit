@@ -205,12 +205,12 @@ namespace ASK.Helpers {
 
         public static IEnumerator Sleep(float delayTime)
         {
-            yield return new WaitForSeconds(delayTime / Game.TimeManager.TimeScale);
+            yield return new WaitForSeconds(delayTime / Game.TimeManager.GetTimeScale());
         }
 
         public static IEnumerator DelayAction(float delayTime, Action act) {
             //Wait for the specified delay time before continuing.
-            yield return new WaitForSeconds(delayTime / Game.TimeManager.TimeScale);
+            yield return new WaitForSeconds(delayTime / Game.TimeManager.GetTimeScale());
 
             //Do the action after the delay time has finished.
             act();
