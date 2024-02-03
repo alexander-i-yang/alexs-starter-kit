@@ -46,13 +46,13 @@ namespace ASK.Core
             _frameCount = (_frameCount + 1) % 10000;
         }
 
-        public Timescaler.TimeScale ApplyTimescale(float f, int priority)
+        public virtual Timescaler.TimeScale ApplyTimescale(float f, int priority)
         {
             OnTimeScaleChange?.Invoke();
             return _timescaler.ApplyTimescale(f, priority);
         }
 
-        public void RemoveTimescale(Timescaler.TimeScale t)
+        public virtual void RemoveTimescale(Timescaler.TimeScale t)
         {
             OnTimeScaleChange?.Invoke();
             _timescaler.RemoveTimescale(t);

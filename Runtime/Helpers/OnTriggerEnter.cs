@@ -6,10 +6,10 @@ using UnityEngine.Events;
 //L: More Boomo Scripts Yay.
 public class OnTriggerEnter : MonoBehaviour
 {
+    [SerializeField] private bool onlyTriggerOnce;
+    
     public UnityEvent onEnter;
     public UnityEvent onExit;
-
-    [SerializeField] private bool onlyTriggerOnce;
     
     private bool _hasEntered;
 
