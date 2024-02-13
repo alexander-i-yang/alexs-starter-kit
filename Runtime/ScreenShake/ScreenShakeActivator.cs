@@ -20,5 +20,7 @@ namespace ASK.ScreenShake
         {
             Game.Instance.CamController.ScreenShakeMan.ScreenShakeContinuousOff(vcam, d);
         }
+
+        public abstract CinemachineVirtualCamera GetCamera();
     }
 }
