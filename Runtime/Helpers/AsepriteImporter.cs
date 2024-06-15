@@ -5,7 +5,8 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-public class EditorHelper : EditorWindow {
+[Obsolete]
+public class AsepriteImporter : EditorWindow {
     public static int sliceWidth = 32;
     public static int sliceHeight = 32;
 
@@ -16,9 +17,9 @@ public class EditorHelper : EditorWindow {
     [MenuItem("Window/Sprite Animator")]
     static void Init() {
         // Window Set-Up
-        EditorHelper window =
-            EditorWindow.GetWindow(typeof(EditorHelper), false, "AnimationGenerator", true) as
-                EditorHelper;
+        AsepriteImporter window =
+            EditorWindow.GetWindow(typeof(AsepriteImporter), false, "AnimationGenerator", true) as
+                AsepriteImporter;
         window.minSize = new Vector2(200, 200);
         window.maxSize = new Vector2(400, 400);
         window.Show();

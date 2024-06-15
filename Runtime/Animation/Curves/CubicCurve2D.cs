@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ASK.Animation
 {
-    public abstract class CubicCurve2D
+    public class CubicCurve2D
     {
         protected Vector2 t3Coeff;
         protected Vector2 t2Coeff;
