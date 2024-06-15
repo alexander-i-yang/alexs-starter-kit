@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ASK.Animation
 {
@@ -17,16 +18,16 @@ namespace ASK.Animation
     {
         public float Amplitude = 1;
         public float Frequency = 1;
-        [InspectorName("WaveType")] public WaveType m_WaveType = WaveType.Sine;
+        [InspectorName("WaveType")] public WaveType WaveType = WaveType.Sine;
         
         public string Formula = "sin(x)";
 
         private Func<float, float> waveFunc => (t) =>
         {
-            if (this.m_WaveType == WaveType.Sine) return Mathf.Sin(t);
-            if (this.m_WaveType == WaveType.Cosine) return Mathf.Cos(t);
-            if (this.m_WaveType == WaveType.Square) return Mathf.Sign(t % 2 - 1);
-            if (this.m_WaveType == WaveType.Custom)
+            if (this.WaveType == WaveType.Sine) return Mathf.Sin(t);
+            if (this.WaveType == WaveType.Cosine) return Mathf.Cos(t);
+            if (this.WaveType == WaveType.Square) return Mathf.Sign(t % 2 - 1);
+            if (this.WaveType == WaveType.Custom)
             {
                 ExpressionEvaluator.Evaluate(Formula.Replace("x", $"({t.ToString("0.000")})"), out float result);
                 return result;

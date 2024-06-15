@@ -31,11 +31,13 @@ namespace ASK.Editor
 
         private void DrawProperties(SerializedProperty property, WaveData waveData)
         {
-            EditorGUILayout.PropertyField(property.FindPropertyRelative("Frequency"));
-            EditorGUILayout.PropertyField(property.FindPropertyRelative("Amplitude"));
-            EditorGUILayout.PropertyField(property.FindPropertyRelative("m_WaveType"));
-            if (waveData.m_WaveType == WaveType.Custom)
-                EditorGUILayout.PropertyField(property.FindPropertyRelative("Formula"));
+            EditorGUILayout.PropertyField(property.FindPropertyRelative(nameof(waveData.Frequency)));
+            EditorGUILayout.PropertyField(property.FindPropertyRelative(nameof(waveData.Amplitude)));
+            EditorGUILayout.PropertyField(property.FindPropertyRelative(nameof(waveData.WaveType)));
+            if (waveData.WaveType == WaveType.Custom)
+            {
+                EditorGUILayout.PropertyField(property.FindPropertyRelative(nameof(waveData.Formula)));
+            }
         }
 
         private void DrawPreview(Rect position, SerializedProperty property, WaveData waveData)
