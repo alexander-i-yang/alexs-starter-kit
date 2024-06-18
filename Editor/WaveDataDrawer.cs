@@ -3,17 +3,18 @@ using System.Reflection;
 using UnityEditor;
 using ASK.Animation;
 using ASK.Core;
+using UnityEditor.AnimatedValues;
 using UnityEngine;
 
 namespace ASK.Editor
 {
     [CustomPropertyDrawer(typeof(WaveData))]
-    public class WaveDataDrawerUIE : PropertyDrawer
+    public class WaveDataDrawer : PropertyDrawer
     {
         private bool _foldout = true;
         private bool _preview = true;
         private Vector2 _scale = new Vector2(1, 1);
-
+        
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             _foldout = EditorGUILayout.Foldout(_foldout, label);

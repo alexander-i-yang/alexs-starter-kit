@@ -321,10 +321,43 @@ namespace ASK.Helpers {
             point = dir + pivot; // calculate rotated point
             return point; // return it
         }
-
-        public static float GetRandom(this RangedInt range)
+        
+        public static Vector3 Snap(this Vector3 v, Vector3 snapBy)
         {
-            return Random.Range(range.Min, range.Max);
+            return new Vector3(
+                RoundTo(v.x, snapBy.x),
+                RoundTo(v.y, snapBy.y),
+                RoundTo(v.z, snapBy.z)
+            );
         }
+        
+        public static Vector2 Snap(this Vector2 v, Vector2 snapBy)
+        {
+            return new Vector2(
+                RoundTo(v.x, snapBy.x),
+                RoundTo(v.y, snapBy.y)
+            );
+        }
+
+        public static Vector2 Abs(this Vector2 v) => new (Math.Abs(v.x), Math.Abs(v.y));
+
+        public static float RoundTo(float value, float factor)
+        {
+            if (factor == 0) return value;
+            return (float)Math.Round(
+                (value / (double)factor),
+                MidpointRounding.AwayFromZero
+            ) * factor;
+        }
+
+        public static Vector3 Randomize(this Vector3 v, float range)
+        {
+            v.x += Random.Range(-range, range);
+            v.y += Random.Range(-range, range);
+            v.z += Random.Range(-range, range);
+            return v;
+        }
+
+        public static float GetRandom(this RangedInt range) => Random.Range(range.Min, range.Max);
     }
 }
