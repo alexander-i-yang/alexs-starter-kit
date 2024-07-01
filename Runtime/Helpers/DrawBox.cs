@@ -20,12 +20,31 @@ namespace ASK.Helpers
             DrawBoxCast2D(hitbox.transform.position + (Vector3)r.center, r.size, 0, Vector2.zero, 0, color);
         }
 
-        public static void DrawHitboxHandles(Hitbox h)
+        public static void FillHitbox(Hitbox hitbox, Color fillColor = default, Color outlineColor = default)
         {
-            Handles.DrawLine(h.BottomLeftGlobal, h.BottomRightGlobal);
-            Handles.DrawLine(h.BottomRightGlobal, h.TopRightGlobal);
-            Handles.DrawLine(h.TopRightGlobal, h.TopLeftGlobal);
-            Handles.DrawLine(h.TopLeftGlobal, h.BottomLeftGlobal);
+            if (fillColor == default) fillColor = Color.white;
+            if (outlineColor == default) outlineColor = Color.white;
+            var verts = new Vector3[]
+            {
+                hitbox.TopLeftGlobal,
+                hitbox.TopRightGlobal,
+                hitbox.BottomRightGlobal,
+                hitbox.BottomLeftGlobal,
+            };
+            Handles.DrawSolidRectangleWithOutline(verts, fillColor, outlineColor);
+        }
+
+        public static void DrawHitboxHandles(Hitbox h, Color col = default)
+        {
+            if (col == default) col = Color.white;
+            using (var scope = new Handles.DrawingScope())
+            {
+                Handles.color = col;
+                Handles.DrawLine(h.BottomLeftGlobal, h.BottomRightGlobal);
+                Handles.DrawLine(h.BottomRightGlobal, h.TopRightGlobal);
+                Handles.DrawLine(h.TopRightGlobal, h.TopLeftGlobal);
+                Handles.DrawLine(h.TopLeftGlobal, h.BottomLeftGlobal);
+            }
         }
 
         public static void DrawBoxCastOnHit(Vector3 origin, Vector3 halfExtents, Quaternion orientation,

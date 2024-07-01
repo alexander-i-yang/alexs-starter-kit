@@ -14,7 +14,7 @@ namespace ASK.Runtime.Phys2D {
         [SerializeField] private PhysState _physState = new PhysState();
         
         [SerializeField] private IPhysModule[] _physModules;
-        [SerializeField] private ICollisionModule[] _collisionModules;
+        [SerializeField] private ICollisionBehavior[] _collisionModules;
         private ISquishBehavior _squishBehavior;
         
         public IPhysModule[] PhysModules => _physModules;
@@ -35,7 +35,7 @@ namespace ASK.Runtime.Phys2D {
         private void Awake()
         {
             _physModules = GetComponents<IPhysModule>();
-            _collisionModules = GetComponents<ICollisionModule>();
+            _collisionModules = GetComponents<ICollisionBehavior>();
             _squishBehavior = GetComponent<ISquishBehavior>();
         }
         

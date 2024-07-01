@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ASK.Runtime.Phys2D.Modules
 {
-    public class WallCollisionModule : ICollisionModule
+    public class WallCollisionBehavior : ICollisionBehavior
     {
         public override PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
         {

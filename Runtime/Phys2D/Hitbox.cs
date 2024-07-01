@@ -1,12 +1,15 @@
 using System;
 using ASK.Helpers;
+using MyBox;
 using UnityEditor;
 using UnityEngine;
 
 namespace ASK.Runtime.Phys2D
 {
-    public class Hitbox : MonoBehaviour
+    public sealed class Hitbox : MonoBehaviour
     {
+        public static Color GizmoColor = new(1, 0.5f, 0.4f);
+        
         [field: SerializeField] public Rect Bounds { get; set; }
 
         public Vector2 Center
@@ -113,21 +116,25 @@ namespace ASK.Runtime.Phys2D
         #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
-            BoxDrawer.DrawHitboxHandles(this);
+            //BoxDrawer.DrawHitboxHandles(this, new Color(1,0.5f,0.4f));
+            BoxDrawer.FillHitbox(this, GizmoColor.WithAlphaSetTo(0.05f), GizmoColor);
         }
         #endif
 
         /// <summary>
-        /// Sets the corner of the hitbox to newPos and updates all other corners to be the same distance from the center.
+        /// Sets the corner of the hitbox to newPos. Preserves the original center.
+        /// NewPos is a global position.
         /// </summary>
-        /// <param name="newPos"></param>
-        public void SetCorner(Vector2 newPos)
+        /// <param name="newPos">Global position for new corner.</param>
+        public void SetCornerGlobal(Vector2 newPos)
         {
-            Vector2 newExtents = (Center - newPos).Abs();
+            Vector2 newExtents = (Center + (Vector2)transform.position - newPos).Abs();
             var bounds = Bounds;
             bounds.size = newExtents * 2;
             bounds.center = Center;
             Bounds = bounds;
         }
+
+        public bool GlobalContains(Vector3 ray) => Bounds.Contains(ray - transform.position);
     }
 }

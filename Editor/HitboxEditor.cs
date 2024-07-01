@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ASK.Helpers;
 using ASK.Runtime.Phys2D;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace ASK.Editor
 {
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(Hitbox))]
     public class HitboxEditor : UnityEditor.Editor
     {
@@ -15,14 +18,18 @@ namespace ASK.Editor
         private Vector2 _snapBy = Vector2.one;
 
         private float _cornerHandleMargin = 0.2f;
+        
         private void OnEnable()
         {
             _hitbox = (Hitbox)target;
+            HandleUtility.PickGameObjectCallback e = OnPickGameObjectCustomPasses;
+            HandleUtility.pickGameObjectCustomPasses += e;
         }
 
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
+            
             _center = _hitbox.Center;
             _center = EditorGUILayout.Vector2Field("Center", _center);
             _snapBy = EditorGUILayout.Vector2Field("Snap by", _snapBy);
@@ -51,14 +58,17 @@ namespace ASK.Editor
             //Not using a dictionary to account for duplicate keys
             var positions = new List<Tuple<Vector3, Action<Vector2>>>
             {
+                // Corner handles
                 new(_hitbox.BottomLeftGlobal, newPos => _hitbox.BottomLeftGlobal = newPos),
                 new(_hitbox.BottomRightGlobal, newPos => _hitbox.BottomRightGlobal = newPos),
                 new(_hitbox.TopLeftGlobal, newPos => _hitbox.TopLeftGlobal = newPos),
                 new( _hitbox.TopRightGlobal, newPos => _hitbox.TopRightGlobal = newPos),
-                new( _hitbox.TopRightGlobal + margin, newPos => _hitbox.SetCorner(newPos)),
-                new( _hitbox.TopLeftGlobal + new Vector2(-margin.x, margin.y), newPos => _hitbox.SetCorner(newPos)),
-                new( _hitbox.BottomRightGlobal + new Vector2(margin.x, -margin.y), newPos => _hitbox.SetCorner(newPos)),
-                new( _hitbox.BottomLeftGlobal + new Vector2(-margin.x, -margin.y), newPos => _hitbox.SetCorner(newPos)),
+                
+                // Centered corner handles
+                new( _hitbox.TopRightGlobal + margin, newPos => _hitbox.SetCornerGlobal(newPos)),
+                new( _hitbox.TopLeftGlobal + new Vector2(-margin.x, margin.y), newPos => _hitbox.SetCornerGlobal(newPos)),
+                new( _hitbox.BottomRightGlobal + new Vector2(margin.x, -margin.y), newPos => _hitbox.SetCornerGlobal(newPos)),
+                new( _hitbox.BottomLeftGlobal + new Vector2(-margin.x, -margin.y), newPos => _hitbox.SetCornerGlobal(newPos)),
                 new( _hitbox.GlobalCenter, newPos => _hitbox.GlobalCenter = newPos),
             };
 
@@ -71,13 +81,32 @@ namespace ASK.Editor
         {
             EditorGUI.BeginChangeCheck();
             float size = HandleUtility.GetHandleSize(position) * 0.05f;
-            var newPos = Handles.FreeMoveHandle(position, size, Vector3.one, Handles.RectangleHandleCap);
+            
+            Handles.color = Hitbox.GizmoColor;
+
+            var newPos = Handles.FreeMoveHandle(position, size, _snapBy, Handles.RectangleHandleCap);
             if (EditorGUI.EndChangeCheck())
             {
                 newPos = newPos.Snap(_snapBy);
                 Undo.RecordObject(this, "Change hitbox bounds");
                 updateFunction(newPos);
             }
+        }
+        
+        GameObject OnPickGameObjectCustomPasses ( Camera cam , int layers , Vector2 position , GameObject[] ignore , GameObject[] filter , out int materialIndex )
+        {
+            materialIndex = -1;
+            if (_hitbox == null) return null;
+            
+            GameObject gameObject = _hitbox.gameObject;
+            if (layers != -1 && (gameObject.layer & layers) == 0) return null;
+            if (ignore != null && ignore.Contains(gameObject)) return null;
+            if (filter != null && !filter.Contains(gameObject)) return null;
+            
+            var ray = cam.ScreenToWorldPoint( position );
+            //Bounds b = new Bounds((Vector3)_hitbox.Center + _hitbox.transform.position, new Vector3(_hitbox.Size.x, _hitbox.Size.y, 1000000));
+            bool hit = _hitbox.GlobalContains(ray);
+            return hit ? gameObject : null;
         }
     }
 }
