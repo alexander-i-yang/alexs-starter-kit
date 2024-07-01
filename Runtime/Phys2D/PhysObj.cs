@@ -1,14 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using ASK.Core;
 using ASK.Helpers;
+using ASK.Runtime.Phys2D.Modules;
 using UnityEngine;
 
 namespace ASK.Runtime.Phys2D {
-    [RequireComponent(typeof(Hitbox))]
+    [RequireComponent(typeof(Hitbox), typeof(ISquishBehavior))]
     public abstract class PhysObj : MonoBehaviour
     {
         private Hitbox _myHitbox;
+        [SerializeField] private PhysState _physState = new PhysState();
+        
+        [SerializeField] private IPhysModule[] _physModules;
+        [SerializeField] private ICollisionModule[] _collisionModules;
+        private ISquishBehavior _squishBehavior;
+        
+        public IPhysModule[] PhysModules => _physModules;
+
         protected Hitbox myHitbox
         {
             get
@@ -20,7 +30,25 @@ namespace ASK.Runtime.Phys2D {
 
         public Vector2 velocity { get; protected set; }  = Vector2.zero;
         
-        [NonSerialized] private Vector2 _subPixels = Vector2.zero;
+        [SerializeField] private Vector2 _subPixels = Vector2.zero;
+
+        private void Awake()
+        {
+            _physModules = GetComponents<IPhysModule>();
+            _collisionModules = GetComponents<ICollisionModule>();
+            _squishBehavior = GetComponent<ISquishBehavior>();
+        }
+        
+        private void FixedUpdate()
+        {
+            var surroundings = CheckCollisions(Vector2.down);
+            foreach (var module in _physModules)
+            {
+                _physState = module.ProcessSurroundings(_physState, surroundings, Vector2.down);
+            }
+            
+            Move(_physState.velocity * Game.TimeManager.FixedDeltaTime);
+        }
 
         public float velocityY {
             get { return velocity.y; }
@@ -38,8 +66,8 @@ namespace ASK.Runtime.Phys2D {
         /// <param name="direction"></param>
         /// <param name="onCollide"></param>
         /// <returns></returns>
-        public PhysObj CheckCollisions(Vector2 direction, Func<PhysObj, Vector2, bool> onCollide) =>
-            CheckCollisions<PhysObj>(direction, onCollide);
+        public PhysObj[] CheckCollisions(Vector2 direction) =>
+            CheckCollisions<PhysObj>(direction);
 
         /// <summary>
         /// Checks the interactable layer for any collisions. Will call onCollide if it hits anything.
@@ -49,83 +77,18 @@ namespace ASK.Runtime.Phys2D {
         /// returns physObj when collide, otherwise null.</param>
         /// <typeparam name="T">Type of physObj to check against. Must inherit from PhysObj.</typeparam>
         /// <returns></returns>
-        public T CheckCollisions<T>(Vector2 direction, Func<T, Vector2, bool> onCollide) where T : PhysObj
+        public T[] CheckCollisions<T>(Vector2 direction) where T : PhysObj
         {
             var physObjs = FindObjectsOfType<T>();
+            List<T> ret = new();
             foreach (var p in physObjs)
             {
                 bool willCollide = myHitbox.WillCollide(p.myHitbox, direction);
-                if (willCollide)
-                    if (onCollide(p, direction))
-                        return p;
+                if (willCollide) ret.Add(p);
             }
 
-            return null;
+            return ret.ToArray();
         }
-        
-        /*
-        public T CheckCollisions<T>(Vector2 direction, Func<T, Vector2, bool> onCollide) where T : PhysObj{
-            Vector2 colliderSize = myHitbox.size;
-            Vector2 sizeMult = colliderSize - Vector2.one;
-            List<RaycastHit2D> hits = new List<RaycastHit2D>();
-            ContactFilter2D filter = new ContactFilter2D();
-            filter.layerMask = LayerMask.GetMask("Interactable", "Ground", "Player");
-            filter.useLayerMask = true;
-            Physics2D.BoxCast(transform.position, sizeMult, 0, direction, filter, hits, 8f);
-
-            List<T> collideTs = new();
-            
-            foreach (var hit in hits) {
-                if (hit.transform == transform)
-                {
-                    continue;
-                }
-                var t = hit.transform.GetComponent<T>();
-                if (t != null)
-                {
-                    collideTs.Add(t);
-                }
-            }
-            
-            foreach (var s in collideTs)
-            {
-                bool proactiveCollision = ProactiveBoxCast(
-                    s.transform, 
-                    s.NextFrameOffset,
-                    sizeMult,
-                    1,
-                    direction, 
-                    filter
-                );
-                if (proactiveCollision)
-                {
-                    bool col = onCollide(s, direction);
-                    if (col)
-                    {
-                        return s;
-                    }
-                }
-            }
-            
-            return null;
-        }*/
-        
-        /*private void OnDrawGizmosSelected() {
-            Vector2 direction = velocity == Vector2.zero ? Vector2.up: velocity.normalized;
-            var col = GetComponent<BoxCollider2D>();
-            if (col == null) return;
-            Vector2 colliderSize = col.size;
-            Vector2 sizeMult = colliderSize - Vector2.one;
-            // Vector2 sizeMult = colliderSize;
-            BoxDrawer.DrawBoxCast2D(
-                origin: (Vector2) transform.position,
-                size: sizeMult,
-                direction: direction,
-                distance: 1,
-                angle: 0,
-                color: Color.blue
-            );
-        }*/
 
         protected void Move(Vector2 vel) {
             vel += _subPixels;
@@ -145,39 +108,47 @@ namespace ASK.Runtime.Phys2D {
             _subPixels = vel - truncVel;
         }
         public abstract bool MoveGeneral(Vector2 direction, int magnitude, Func<PhysObj, Vector2, bool> onCollide);
-        
-        public abstract bool Collidable(PhysObj collideWith);
-        public virtual bool OnCollide(PhysObj p, Vector2 direction) {
-            return p.Collidable(this);
+
+        /// <summary>
+        /// Called when p bumps into this PhysObj.
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="direction">The direction p was moving.</param>
+        public virtual void OnCollideWith(PhysObj p, Vector2 direction) {}
+        // public abstract bool Collidable(PhysObj collideWith);
+        public bool OnCollide(PhysObj p, Vector2 direction)
+        {
+            p.OnCollideWith(this, direction);
+            foreach (var module in _collisionModules)
+            {
+                _physState = module.OnCollide(_physState, p, direction);
+            }
+            return _physState.Collided;
         }
 
         /*public virtual bool PlayerCollide(Actor p, Vector2 direction) {
             return OnCollide(p, direction);
         }*/
 
-        public virtual bool IsGround(PhysObj whosAsking) {
-            return Collidable(whosAsking);
-        }
-
         //TODO: change this so that it only looks for actors near me
         public static Actor[] AllActors() {
             return FindObjectsOfType<Actor>();
         }
-        
-        public abstract bool Squish(PhysObj p, Vector2 d);
-        
+
+        public bool Squish(PhysObj p, Vector2 d) => _squishBehavior.Squish(p, d);
+
         /**
          * Gets the physObj underneath this PhysObj's feet.
          */
-        public PhysObj GetBelowPhysObj() => CheckCollisions(Vector2.down, (p, d) => this.Collidable(p));
+        // public PhysObj GetBelowPhysObj() => CheckCollisions(Vector2.down, (p, d) => this.Collidable(p));
 
         /**
          * Calculates the physics object this PhysObj is riding on.
          */
-        public virtual PhysObj RidingOn() => GetBelowPhysObj();
+        // public virtual PhysObj RidingOn() => GetBelowPhysObj();
 
         //public int ColliderBottomY() => Convert.ToInt16(transform.position.y + myHitbox.offset.y - myHitbox.bounds.extents.y);
-        
+
         //public int ColliderTopY() => Convert.ToInt16(transform.position.y + myHitbox.offset.y + myHitbox.bounds.extents.y);
     }
 }

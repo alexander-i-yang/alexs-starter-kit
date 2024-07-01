@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ASK.Editor
 {
-    [CustomEditor(typeof(ASK.Runtime.Phys2D.Hitbox))]
+    [CustomEditor(typeof(Hitbox))]
     public class HitboxEditor : UnityEditor.Editor
     {
         private Hitbox _hitbox;
