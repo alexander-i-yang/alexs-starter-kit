@@ -8,7 +8,7 @@ using UnityEngine;
 namespace ASK.Runtime.Phys2D.Modules
 {
     [Serializable]
-    public class GravityModule : IPhysModule
+    public class GravityPhysBehavior : IPhysBehavior
     {
         [SerializeField] protected float GravityDown;
         [SerializeField] protected float GravityUp;
@@ -16,7 +16,7 @@ namespace ASK.Runtime.Phys2D.Modules
 
         [SerializeField] private bool _grounded;
 
-        public override PhysState ProcessSurroundings(PhysState p, PhysObj[] surroundings, Vector2 direction)
+        public PhysState ProcessSurroundings(PhysState p, PhysObj[] surroundings, Vector2 direction)
         {
             if (direction.y >= 0) return p;
 

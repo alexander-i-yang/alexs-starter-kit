@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ASK.Animation;
 using ASK.Core;
+using ASK.Editor;
 using ASK.Helpers;
 using ASK.Runtime.Phys2D.Modules;
 using UnityEngine;
@@ -13,11 +15,12 @@ namespace ASK.Runtime.Phys2D {
         private Hitbox _myHitbox;
         [SerializeField] private PhysState _physState = new PhysState();
         
-        [SerializeField] private IPhysModule[] _physModules;
+        [SerializeField] private IPhysBehavior[] _physModules;
+        [SerializeField] private ModuleProp[] _eee;
         [SerializeField] private ICollisionBehavior[] _collisionModules;
         private ISquishBehavior _squishBehavior;
         
-        public IPhysModule[] PhysModules => _physModules;
+        public IPhysBehavior[] PhysModules => _physModules;
 
         protected Hitbox myHitbox
         {
@@ -34,7 +37,7 @@ namespace ASK.Runtime.Phys2D {
 
         private void Awake()
         {
-            _physModules = GetComponents<IPhysModule>();
+            _physModules = GetComponents<IPhysBehavior>();
             _collisionModules = GetComponents<ICollisionBehavior>();
             _squishBehavior = GetComponent<ISquishBehavior>();
         }

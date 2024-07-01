@@ -3,6 +3,7 @@ using System.Reflection;
 using UnityEditor;
 using ASK.Animation;
 using ASK.Core;
+using MyBox;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
 
@@ -14,56 +15,99 @@ namespace ASK.Editor
         private bool _foldout = true;
         private bool _preview = true;
         private Vector2 _scale = new Vector2(1, 1);
+        private Rect DrawProperties(Rect position, SerializedProperty property, WaveData waveData)
+        {
+            position = NextRect(position, 1);
+            EditorGUI.PropertyField(position, property.FindPropertyRelative(nameof(WaveData.Frequency)));
+            position = NextRect(position, 1);
+            EditorGUI.PropertyField(position, property.FindPropertyRelative(nameof(WaveData.Amplitude)));
+            position = NextRect(position, 1);
+            EditorGUI.PropertyField(position, property.FindPropertyRelative(nameof(WaveData.WaveType)));
+            if (waveData.WaveType == WaveType.Custom)
+            {
+                position = NextRect(position, 1);
+                EditorGUI.PropertyField(position, property.FindPropertyRelative(nameof(waveData.Formula)));
+            }
+
+            return position;
+        }
         
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            _foldout = EditorGUILayout.Foldout(_foldout, label);
+            position = NextRect(position, 0);
+            _foldout = EditorGUI.Foldout(position, _foldout, label);
             if (!_foldout) return;
-
+            WaveData waveData = (WaveData)property.boxedValue;
+            
             using (new EditorGUI.IndentLevelScope())
             {
-                WaveData waveData = GetRealProperty<WaveData>(property);
-                DrawProperties(property, waveData);
-                
-                _preview = EditorGUILayout.Foldout(_preview, "Preview");
-                if (_preview) DrawPreview(position, property, waveData);
+                EditorGUI.BeginProperty(position, label, property);
+                position = DrawProperties(position, property, waveData);
+                position = NextRect(position, 1);
+                _preview = EditorGUI.Foldout(position, _preview, "Preview");
+                if (_preview)
+                {
+                    position = NextRect(position, 1);
+                    DrawPreview(position, property, waveData);
+                }
             }
         }
 
-        private void DrawProperties(SerializedProperty property, WaveData waveData)
+        public Rect NextRect(Rect position, int i)
         {
-            EditorGUILayout.PropertyField(property.FindPropertyRelative(nameof(waveData.Frequency)));
-            EditorGUILayout.PropertyField(property.FindPropertyRelative(nameof(waveData.Amplitude)));
-            EditorGUILayout.PropertyField(property.FindPropertyRelative(nameof(waveData.WaveType)));
-            if (waveData.WaveType == WaveType.Custom)
-            {
-                EditorGUILayout.PropertyField(property.FindPropertyRelative(nameof(waveData.Formula)));
-            }
+            return new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight*i + EditorGUIUtility.standardVerticalSpacing, position.width,
+                EditorGUIUtility.singleLineHeight);
         }
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            int totalLines = 1;
+
+            if (_foldout)
+            {
+                totalLines += 4;
+                WaveData waveData = (WaveData)property.boxedValue;
+                if (waveData.WaveType == WaveType.Custom) totalLines++;
+                if (_preview) totalLines += 5;
+            }
+ 
+            return (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing) * totalLines;
+        }
+
 
         private void DrawPreview(Rect position, SerializedProperty property, WaveData waveData)
         {
-            GUIStyle style = EditorStyles.helpBox;
-            style.margin = new RectOffset((EditorGUI.indentLevel + 1) * 10 + 3, 0, 4, 0);
-            using (new GUILayout.VerticalScope(EditorStyles.helpBox))
+            int indent = (EditorGUI.indentLevel+1) * 10;
+            int height = (int)(EditorGUIUtility.singleLineHeight * 5);
+            position = new Rect(position.x + indent, position.y, position.width - indent, height);
+            using (new GUI.GroupScope(position, EditorStyles.helpBox))
             {
-                Rect relativePosition = new Rect(0, -50, position.width, 100);
-                Rect layoutRectangle = GUILayoutUtility.GetRect(10, position.width, relativePosition.height, 100);
-                using (new GUI.ClipScope(layoutRectangle))
+                EventType eventType = Event.current.type;
+                position = new Rect(0, 0, position.width, height);
+                if (eventType == EventType.Repaint)
                 {
-                    EventType eventType = Event.current.type;
-                    if (eventType == EventType.Repaint)
-                    {
-                        PaintPreview(relativePosition, waveData);
-                        RepaintInspector(property.serializedObject);
-                    }
-
-                    if (eventType == EventType.ScrollWheel)
-                    {
-                        HandleScroll(layoutRectangle);
-                    }
+                    PaintPreview(position, waveData);
+                    RepaintInspector(property.serializedObject);
+                }
+                if (eventType == EventType.ScrollWheel)
+                {
+                    HandleScroll(position);
                 }
             }
+            /*Rect relativePosition = new Rect(position.x, position.y-50, position.width, 100);
+            Rect layoutRectangle = GUILayoutUtility.GetRect(10, position.width, relativePosition.height, 100);
+            using (new GUI.ClipScope(layoutRectangle))
+            {
+                EventType eventType = Event.current.type;
+                if (eventType == EventType.Repaint)
+                {
+                    PaintPreview(relativePosition, waveData);
+                    RepaintInspector(property.serializedObject);
+                }
+                /*if (eventType == EventType.ScrollWheel)
+                {
+                    HandleScroll(layoutRectangle);
+                }#1#
+            }*/
         }
 
         private void HandleScroll(Rect layoutRectangle)
@@ -81,7 +125,7 @@ namespace ASK.Editor
 
         void PaintPreview(Rect position, WaveData waveData)
         {
-            Vector2 offset = new Vector2(0, position.height / 2);
+            Vector2 offset = new Vector2(position.x, position.height/2);
             Handles.color = Color.red;
 
             float w = waveData.GetWholeCyclesUntil(position.width, _scale.x);
@@ -146,24 +190,6 @@ namespace ASK.Editor
                     item.Repaint();
                     return;
                 }
-        }
-
-        private const BindingFlags BINDING_FLAGS = BindingFlags.NonPublic | BindingFlags.Instance;
-        private const BindingFlags BINDING_FLAGS_PUB = BindingFlags.Public | BindingFlags.Instance;
-
-        public T GetRealProperty<T>(SerializedProperty property)
-        {
-            var targetObject = property.serializedObject.targetObject;
-            var targetObjectClassType = targetObject.GetType();
-            var field = targetObjectClassType.GetField(property.propertyPath, BINDING_FLAGS);
-            if (field == null) field = targetObjectClassType.GetField(property.propertyPath, BINDING_FLAGS_PUB);
-            if (field != null)
-            {
-                var value = field.GetValue(targetObject);
-                return (T)value;
-            }
-
-            return default;
         }
     }
 }
