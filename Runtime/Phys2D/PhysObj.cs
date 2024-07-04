@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using ASK.Animation;
 using ASK.Core;
-using ASK.Editor;
-using ASK.Helpers;
 using ASK.Runtime.Phys2D.Modules;
 using UnityEngine;
 
@@ -12,12 +9,29 @@ namespace ASK.Runtime.Phys2D {
     [RequireComponent(typeof(Hitbox), typeof(ISquishBehavior))]
     public abstract class PhysObj : MonoBehaviour
     {
+        [Serializable]
+        private class Hello : IPhysBehavior
+        {
+            [SerializeField] private int e;
+            public PhysState ProcessSurroundings(PhysState p, PhysObj[] surroundings, Vector2 direction)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         private Hitbox _myHitbox;
         [SerializeField] private PhysState _physState = new PhysState();
         
-        [SerializeField] private IPhysBehavior[] _physModules;
-        [SerializeField] private ModuleProp[] _eee;
+        [SerializeReference] private IPhysBehavior[] _physModules = new []
+        {
+            new GravityPhysBehavior()
+        };
+
+        [SerializeField]
+        public GravityPhysBehavior g = new();
+        //[SerializeField] private ModuleContainer[] ello;
         [SerializeField] private ICollisionBehavior[] _collisionModules;
+        
         private ISquishBehavior _squishBehavior;
         
         public IPhysBehavior[] PhysModules => _physModules;
