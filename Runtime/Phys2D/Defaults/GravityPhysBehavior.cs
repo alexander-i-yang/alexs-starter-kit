@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using ASK.Core;
 using ASK.Runtime.Phys2D.Behaviors;
@@ -13,18 +14,18 @@ namespace ASK.Runtime.Phys2D.Defaults
         [SerializeField] protected float GravityUp;
         [SerializeField] protected float MaxFall;
 
-        public PhysState ProcessSurroundings(PhysState p, PhysObj[] surroundings, Vector2 direction)
+        public PhysState ProcessSurroundings(PhysState p, Dictionary<Vector2, PhysObj[]> surroundings)
         {
-            if (direction.y >= 0) return p;
-
-            p.grounded = ComputeGrounded(surroundings);
+            var surroundingsDown = surroundings[Vector2.down];
+            
+            p.grounded = ComputeGrounded(surroundingsDown);
             if (!p.grounded) p.velocity.y = Fall(p.velocity.y);
             return p;
         }
 
         public bool ComputeGrounded(PhysObj[] surroundings)
         {
-            var grounds = surroundings.Select(x => x.GetComponent<Wall>());
+            var grounds = surroundings.Select(x => x.GetComponent<Ground>());
             return grounds.Any(w => w != null);
         }
         

@@ -7,8 +7,8 @@ namespace ASK.Runtime.Phys2D.Defaults
     {
         public PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
         {
-            Wall wall = physObj.GetComponent<Wall>();
-            if (wall != null) physState.collided = true;
+            Ground ground = physObj.GetComponent<Ground>();
+            if (ground != null) physState.collided = true;
             return physState;
         }
     }

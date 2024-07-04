@@ -10,5 +10,7 @@ namespace ASK.Runtime.Phys2D.Behaviors
         public bool collided;
         public Vector2 velocity;
         public bool grounded;
+
+        public PhysObj[] ridingOn;
     }
 }

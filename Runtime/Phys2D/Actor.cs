@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Linq;
 using ASK.Core;
+using ASK.Editor.Standalone;
+using ASK.Runtime.Phys2D.Behaviors;
 using MyBox;
 using UnityEditor;
 using UnityEngine;
@@ -7,14 +10,12 @@ using UnityEngine;
 namespace ASK.Runtime.Phys2D {
     public sealed class Actor : PhysObj
     {
-        [Foldout("Movement Events")]
-        [SerializeField] public ActorEvent OnLand;
-
-        [SerializeField, Foldout("Gravity")] protected int BonkHeadV;
-
-        public bool IsMovingUp => velocityY >= 0;
+        // [Foldout("Movement Events")]
+        // [SerializeField] public ActorEvent OnLand;
         
-        public int Facing => Math.Sign(velocity.x);    //-1 is facing left, 1 is facing right
+        //public bool IsMovingUp => velocityY >= 0;
+        
+        //public int Facing => Math.Sign(velocityX);    //-1 is facing left, 1 is facing right
 
         // private void Awake()
         // {
@@ -54,53 +55,7 @@ namespace ASK.Runtime.Phys2D {
             return false;
         }
 
-        public void ApplyVelocity(Vector2 v)
-        {
-            velocity += v;
-        }
-
         #region Jostling
-        protected PhysObj ridingOn { get; private set; }
-        //Prev velocity of RidingOn
-        protected Vector2 prevRidingV { get; private set; }
-        protected PhysObj prevRidingOn { get; private set; }
-        public bool IsRiding(Solid solid) => ridingOn == solid;
-        public void Ride(Vector2 direction) => Move(direction);
-        
-        /**
-         * When there was a floor but now there's not
-         */
-        protected bool JumpedOff() => prevRidingOn != null && ridingOn == null;
-        
-        /**
-         * When the floor was moving but now it's not
-         */
-        protected bool FloorStopped() => prevRidingV != Vector2.zero && ridingOn != null && ridingOn.velocity == Vector2.zero;
-        
-        protected bool ShouldApplyV() => JumpedOff() || FloorStopped();
-        
-        /**
-         * Set _ridingOn to whatever CalcRiding returns.
-         * Should get called every frame.
-         */
-        /*public virtual Vector2 ResolveJostle()
-        {
-            Vector2 ret = Vector2.zero;
-            ridingOn = RidingOn();
-            if (ShouldApplyV())
-            {
-                ret = ResolveApplyV(ret);
-            }
-            prevRidingOn = ridingOn;
-            prevRidingV = ridingOn == null ? Vector2.zero : ridingOn.velocity;
-            return ret;
-        }*/
-        
-        /**
-         * Input previousApplyVelocity, output new apply velocity.
-         * Only called when shouldApplyV.
-         */
-        protected Vector2 ResolveApplyV(Vector2 v) => prevRidingV;
         
         public bool Push(Vector2 direction, Solid pusher)
         {
@@ -110,24 +65,18 @@ namespace ASK.Runtime.Phys2D {
             });
         }
         
-        public void BonkHead() {
+        public void Ride(Vector2 direction) => Move(direction);
+
+        /*public void BonkHead() {
             velocityY = Math.Min(BonkHeadV, velocityY);
         }
-        
+
         public void Land()
         {
-            OnLand.Invoke(velocity);
+            OnLand.Invoke();
             velocityY = 0;
-        }
-        
-        #if UNITY_EDITOR
-        private void OnDrawGizmosSelected() {
-            Handles.Label(transform.position, $"Velocity: <{(int)velocityX}, {(int)velocityY}>");
-        }
-        #endif
-        
-        #endregion
+        }*/
 
-        public void SetVelocity(Vector2 newV) => velocity = newV;
+        #endregion
     }
 }

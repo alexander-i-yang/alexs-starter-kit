@@ -15,7 +15,7 @@ namespace ASK.Runtime.Phys2D {
             
             // If the actor moves at least 1 pixel, Move one pixel at a time
             while (remainder > 0) {
-                var stuck = CheckCollisions(Vector2.zero);
+                /*var stuck = CheckCollisions(Vector2.zero);
                 foreach (var st in stuck)
                 {
                     bool ret = st != this;
@@ -24,7 +24,7 @@ namespace ASK.Runtime.Phys2D {
                     }
 
                     return ret;
-                }
+                }*/
 
                 HashSet<Actor> ridingActors = new HashSet<Actor>(allActors.Where(c => c.IsRiding(this)));
                 Actor[] collidingActors = CheckCollisions<Actor>(direction);

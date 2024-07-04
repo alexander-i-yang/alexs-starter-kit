@@ -1,32 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using ASK.Core;
 using ASK.Editor;
 using ASK.Editor.Standalone;
 using ASK.Runtime.Phys2D.Behaviors;
 using ASK.Runtime.Phys2D.Defaults;
+using UnityEditor;
 using UnityEngine;
 
-namespace ASK.Runtime.Phys2D {
+namespace ASK.Runtime.Phys2D
+{
     [RequireComponent(typeof(Hitbox), typeof(ISquishBehavior))]
     public abstract class PhysObj : MonoBehaviour
     {
         private Hitbox _myHitbox;
         [SerializeField] private PhysState _physState;
 
-        [SerializeReference]
-        [ChilrdenClassesDropdown(typeof(IPhysBehavior))]
-        private IPhysBehavior[] _physModules = {
+        [SerializeReference] [ChilrdenClassesDropdown(typeof(IPhysBehavior))]
+        private IPhysBehavior[] _physModules =
+        {
             new GravityPhysBehavior()
         };
 
-        [SerializeReference]
-        [ChilrdenClassesDropdown(typeof(ICollisionBehavior))]
+        [SerializeReference] [ChilrdenClassesDropdown(typeof(ICollisionBehavior))]
         private ICollisionBehavior[] _collisionModules;
-        
+
         private ISquishBehavior _squishBehavior;
-        
+
         protected Hitbox myHitbox
         {
             get
@@ -36,39 +38,46 @@ namespace ASK.Runtime.Phys2D {
             }
         }
 
-        public Vector2 velocity { get; protected set; }  = Vector2.zero;
-        
         [SerializeField] private Vector2 _subPixels = Vector2.zero;
 
         private void Awake()
         {
             _squishBehavior = GetComponent<ISquishBehavior>();
         }
-        
+
         private void FixedUpdate()
         {
             _physState = ResetPhysState(_physState);
-            
-            var surroundings = CheckCollisions(Vector2.down);
-            
+            var surroundings = GetSurroundings();
             foreach (var module in _physModules)
             {
                 if (module == null) continue;
-                _physState = module.ProcessSurroundings(_physState, surroundings, Vector2.down);
+                _physState = module.ProcessSurroundings(_physState, surroundings);
             }
-            
+
             Move(_physState.velocity * Game.TimeManager.FixedDeltaTime);
         }
 
-        public float velocityY {
-            get { return velocity.y; }
-            protected set { velocity = new Vector2(velocity.x, value); }
+        private Dictionary<Vector2, PhysObj[]> GetSurroundings()
+        {
+            return new Dictionary<Vector2, PhysObj[]>
+            {
+                { Vector2.left, CheckCollisions(Vector2.left) },
+                { Vector2.right, CheckCollisions(Vector2.right) },
+                { Vector2.up, CheckCollisions(Vector2.up) },
+                { Vector2.down, CheckCollisions(Vector2.down) },
+            };
+        }
+
+        /*public float velocityY {
+            get { return _physState.velocity.y; }
+            protected set { _physState.velocity = new Vector2(_physState.velocity.x, value); }
         }
 
         public float velocityX {
-            get { return velocity.x; }
-            protected set { velocity = new Vector2(value, velocity.y); }
-        }
+            get { return _physState.velocity.x; }
+            protected set { _physState.velocity = new Vector2(value, _physState.velocity.y); }
+        }*/
 
         /// <summary>
         /// See CheckCollisions<T>
@@ -100,23 +109,27 @@ namespace ASK.Runtime.Phys2D {
             return ret.ToArray();
         }
 
-        protected void Move(Vector2 vel) {
+        protected void Move(Vector2 vel)
+        {
             vel += _subPixels;
-            int moveX = (int) Math.Abs(vel.x);
-            if (moveX != 0) {
+            int moveX = (int)Math.Abs(vel.x);
+            if (moveX != 0)
+            {
                 Vector2 xDir = new Vector2(vel.x / moveX, 0).normalized;
                 MoveGeneral(xDir, moveX, OnCollide);
             }
 
-            int moveY = (int) Math.Abs(vel.y);
-            if (moveY != 0) {
+            int moveY = (int)Math.Abs(vel.y);
+            if (moveY != 0)
+            {
                 Vector2 yDir = new Vector2(0, vel.y / moveY).normalized;
                 MoveGeneral(yDir, moveY, OnCollide);
             }
 
-            Vector2 truncVel = new Vector2((int) vel.x, (int) vel.y);
+            Vector2 truncVel = new Vector2((int)vel.x, (int)vel.y);
             _subPixels = vel - truncVel;
         }
+
         public abstract bool MoveGeneral(Vector2 direction, int magnitude, Func<PhysObj, Vector2, bool> onCollide);
 
         /// <summary>
@@ -124,7 +137,10 @@ namespace ASK.Runtime.Phys2D {
         /// </summary>
         /// <param name="p"></param>
         /// <param name="direction">The direction p was moving.</param>
-        public virtual void OnCollideWith(PhysObj p, Vector2 direction) {}
+        public virtual void OnCollideWith(PhysObj p, Vector2 direction)
+        {
+        }
+
         // public abstract bool Collidable(PhysObj collideWith);
         public bool OnCollide(PhysObj p, Vector2 direction)
         {
@@ -133,6 +149,7 @@ namespace ASK.Runtime.Phys2D {
             {
                 _physState = module.OnCollide(_physState, p, direction);
             }
+
             return _physState.collided;
         }
 
@@ -141,18 +158,29 @@ namespace ASK.Runtime.Phys2D {
         }*/
 
         //TODO: change this so that it only looks for actors near me
-        public static Actor[] AllActors() {
+        public static Actor[] AllActors()
+        {
             return FindObjectsOfType<Actor>();
         }
+        
+        public bool IsRiding(Solid solid) => _physState.ridingOn.Contains(solid);
 
         public bool Squish(PhysObj p, Vector2 d) => _squishBehavior.Squish(p, d);
-        
+
         private PhysState ResetPhysState(PhysState p)
         {
             p.collided = false;
             p.grounded = false;
             return p;
         }
+
+        #if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
+        {
+            Handles.Label(transform.position,
+                $"Velocity: <{(int)_physState.velocity.x}, {(int)_physState.velocity.y}>");
+        }
+        #endif
 
         /**
          * Gets the physObj underneath this PhysObj's feet.

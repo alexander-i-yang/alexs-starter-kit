@@ -68,6 +68,7 @@ namespace ASK.Editor.Standalone
             int padding = 8;
             //style.padding = new RectOffset(padding, 0, 0, 0);
             style.fixedHeight = 18 + POPUP_PADDING;
+            style.richText = true;
             position.height += POPUP_PADDING;
             int indent = index == 0 ? 0 : 2;
             using (new EditorGUI.IndentLevelScope(indent))
@@ -91,9 +92,10 @@ namespace ASK.Editor.Standalone
 
         public GUIContent[] GetDropdownContent()
         {
-            var options = Types.Select(t => $"{t.Name} ({t})").ToList();
+            var options = Types.Select(t => $"<b>{t.Name}</b> <color=#ffffff80>({t})</color>").ToList();
             options.Insert(0, "Select");
             EditorGUI.BeginChangeCheck();
+            var a = new GUIContent();
             return options.Select(x => new GUIContent(x)).ToArray();
         }
 
