@@ -1,6 +1,7 @@
+using ASK.Runtime.Phys2D.Behaviors;
 using UnityEngine;
 
-namespace ASK.Runtime.Phys2D.Modules
+namespace ASK.Runtime.Phys2D.Defaults
 {
     public class SquishDestroyBehavior : MonoBehaviour, ISquishBehavior
     {

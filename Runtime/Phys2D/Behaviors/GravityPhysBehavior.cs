@@ -5,7 +5,7 @@ using MyBox;
 using UnityEditor;
 using UnityEngine;
 
-namespace ASK.Runtime.Phys2D.Modules
+namespace ASK.Runtime.Phys2D.Behaviors
 {
     [Serializable]
     public class GravityPhysBehavior : IPhysBehavior

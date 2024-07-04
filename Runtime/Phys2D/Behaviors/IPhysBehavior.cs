@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace ASK.Runtime.Phys2D.Modules
+namespace ASK.Runtime.Phys2D.Behaviors
 {
     public interface IPhysBehavior
     {

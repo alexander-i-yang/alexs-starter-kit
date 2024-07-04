@@ -12,14 +12,14 @@ namespace ASK.Editor.Utils
     /// <typeparam name="T"></typeparam>
     public class EditorViewDataStore<T> where T : EditorViewData, new()
     {
-        Dictionary<string, T> viewDatas = new ();
+        Dictionary<SerializedProperty, T> viewDatas = new ();
         
         public T GetViewData(SerializedProperty property)
         {
             T viewData;
-            if (!viewDatas.TryGetValue(property.propertyPath, out viewData)) {
+            if (!viewDatas.TryGetValue(property, out viewData)) {
                 viewData = new T();
-                viewDatas[property.propertyPath] = viewData;
+                viewDatas[property] = viewData;
             }
 
             return viewData;
