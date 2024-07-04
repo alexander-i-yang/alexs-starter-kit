@@ -25,7 +25,7 @@ namespace ASK.Runtime.Phys2D.Defaults
 
         public bool ComputeGrounded(PhysObj[] surroundings)
         {
-            var grounds = surroundings.Select(x => x.GetComponent<Ground>());
+            var grounds = surroundings.Select(x => x.GetProperty<Ground>());
             return grounds.Any(w => w != null);
         }
         

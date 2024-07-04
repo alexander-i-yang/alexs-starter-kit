@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using ASK.Core;
 using ASK.Editor.Standalone;
@@ -33,18 +34,35 @@ namespace ASK.Runtime.Phys2D {
             if (magnitude < 0) throw new ArgumentException("Magnitude must be >0");
 
             int remainder = magnitude;
+            Actor[] allActors = AllActors();
             // If the actor moves at least 1 pixel, Move one pixel at a time
             while (remainder > 0) {
                 var collides = CheckCollisions(direction);
                 bool collision = false;
+                
+                HashSet<PhysObj> ridingActors = new HashSet<PhysObj>(allActors.Where(c => c.IsRiding(this)));
+                
                 foreach (PhysObj p in collides)
                 {
+                    /*if (ridingActors.Contains(p))
+                    {
+                        //TODO
+                        p.Push(direction, this);
+                        ridingActors.Remove(p);
+                        continue;
+                    }*/
+                    
                     if (onCollide(p, direction))
                     {
                         collision = true;
                         break;
                     }
                 }
+                
+                foreach (var a in ridingActors) {
+                    a.Ride(direction);
+                }
+                
                 if (collision) {
                     return true;
                 }
@@ -57,16 +75,6 @@ namespace ASK.Runtime.Phys2D {
 
         #region Jostling
         
-        public bool Push(Vector2 direction, Solid pusher)
-        {
-            return MoveGeneral(direction, 1, (ps, ds) => {
-                if (ps != pusher && OnCollide(ps, ds)) return Squish(ps, ds);
-                return false;
-            });
-        }
-        
-        public void Ride(Vector2 direction) => Move(direction);
-
         /*public void BonkHead() {
             velocityY = Math.Min(BonkHeadV, velocityY);
         }

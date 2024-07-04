@@ -17,12 +17,11 @@ namespace ASK.Editor
         private Vector2 _snapBy = Vector2.one;
 
         private float _cornerHandleMargin = 0.2f;
-        
+
         private void OnEnable()
         {
             _hitbox = (Hitbox)target;
-            HandleUtility.PickGameObjectCallback e = OnPickGameObjectCustomPasses;
-            HandleUtility.pickGameObjectCustomPasses += e;
+            AddPickHandlers();
         }
 
         public override void OnInspectorGUI()
@@ -90,6 +89,12 @@ namespace ASK.Editor
                 Undo.RecordObject(this, "Change hitbox bounds");
                 updateFunction(newPos);
             }
+        }
+
+        private void AddPickHandlers()
+        {
+            HandleUtility.PickGameObjectCallback e = OnPickGameObjectCustomPasses;
+            HandleUtility.pickGameObjectCustomPasses += e;
         }
         
         GameObject OnPickGameObjectCustomPasses ( Camera cam , int layers , Vector2 position , GameObject[] ignore , GameObject[] filter , out int materialIndex )

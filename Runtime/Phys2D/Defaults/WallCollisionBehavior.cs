@@ -7,7 +7,7 @@ namespace ASK.Runtime.Phys2D.Defaults
     {
         public PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
         {
-            Ground ground = physObj.GetComponent<Ground>();
+            Ground ground = physObj.GetProperty<Ground>();
             if (ground != null) physState.collided = true;
             return physState;
         }

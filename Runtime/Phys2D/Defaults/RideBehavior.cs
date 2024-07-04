@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ASK.Runtime.Phys2D.Defaults
 {
-    public class DefaultRideBehavior : IPhysBehavior
+    public class RideBehavior : IPhysBehavior
     {
         /**
          * When there was a floor but now there's not
@@ -24,6 +24,6 @@ namespace ASK.Runtime.Phys2D.Defaults
         }
 
         public PhysObj[] Riding(PhysObj[] floors) =>
-            floors.Where(p => p.GetComponent<Ground>() != null).ToArray();
+            floors.Where(p => p.GetProperty<Ridable>() != null).ToArray();
     }
 }

@@ -18,14 +18,20 @@ namespace ASK.Runtime.Phys2D
         private Hitbox _myHitbox;
         [SerializeField] private PhysState _physState;
 
-        [SerializeReference] [ChilrdenClassesDropdown(typeof(IPhysBehavior))]
+        [SerializeReference]
+        [ChilrdenClassesDropdown(typeof(IPhysBehavior))]
         private IPhysBehavior[] _physModules =
         {
             new GravityPhysBehavior()
         };
 
-        [SerializeReference] [ChilrdenClassesDropdown(typeof(ICollisionBehavior))]
+        [SerializeReference]
+        [ChilrdenClassesDropdown(typeof(ICollisionBehavior))]
         private ICollisionBehavior[] _collisionModules;
+
+        [SerializeReference]
+        [ChilrdenClassesDropdown(typeof(IPhysProperty))]
+        private IPhysProperty[] _properties;
 
         private ISquishBehavior _squishBehavior;
 
@@ -102,11 +108,16 @@ namespace ASK.Runtime.Phys2D
             List<T> ret = new();
             foreach (var p in physObjs)
             {
-                bool willCollide = myHitbox.WillCollide(p.myHitbox, direction);
-                if (willCollide) ret.Add(p);
+                if (WillCollide(p, direction))
+                    ret.Add(p);
             }
 
             return ret.ToArray();
+        }
+
+        private bool WillCollide<T>(T physObj, Vector2 direction) where T : PhysObj
+        {
+            return this != physObj && myHitbox.WillCollide(physObj.myHitbox, direction);
         }
 
         protected void Move(Vector2 vel)
@@ -163,16 +174,26 @@ namespace ASK.Runtime.Phys2D
             return FindObjectsOfType<Actor>();
         }
         
-        public bool IsRiding(Solid solid) => _physState.ridingOn.Contains(solid);
+        public bool IsRiding(PhysObj p) => _physState.ridingOn.Contains(p);
 
         public bool Squish(PhysObj p, Vector2 d) => _squishBehavior.Squish(p, d);
 
+        public bool Push(Vector2 direction, PhysObj pusher)
+        {
+            return MoveGeneral(direction, 1, (ps, ds) => {
+                if (ps != pusher && OnCollide(ps, ds)) return Squish(ps, ds);
+                return false;
+            });
+        }
+        
         private PhysState ResetPhysState(PhysState p)
         {
             p.collided = false;
             p.grounded = false;
             return p;
         }
+        
+        public void Ride(Vector2 direction) => Move(direction);
 
         #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
@@ -195,5 +216,17 @@ namespace ASK.Runtime.Phys2D
         //public int ColliderBottomY() => Convert.ToInt16(transform.position.y + myHitbox.offset.y - myHitbox.bounds.extents.y);
 
         //public int ColliderTopY() => Convert.ToInt16(transform.position.y + myHitbox.offset.y + myHitbox.bounds.extents.y);
+        public T GetProperty<T>() where T : class
+        {
+            foreach (var p in _properties)
+            {
+                if (p is T tp)
+                {
+                    return tp;
+                }
+            }
+
+            return default;
+        }
     }
 }
