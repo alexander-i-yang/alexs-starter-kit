@@ -5,6 +5,7 @@ using ASK.Core;
 using ASK.Editor;
 using ASK.Editor.Standalone;
 using ASK.Runtime.Phys2D.Behaviors;
+using ASK.Runtime.Phys2D.Defaults;
 using UnityEngine;
 
 namespace ASK.Runtime.Phys2D {
@@ -16,7 +17,9 @@ namespace ASK.Runtime.Phys2D {
 
         [SerializeReference]
         [ChilrdenClassesDropdown(typeof(IPhysBehavior))]
-        private IPhysBehavior[] _physModules;
+        private IPhysBehavior[] _physModules = {
+            new GravityPhysBehavior()
+        };
 
         [SerializeReference]
         [ChilrdenClassesDropdown(typeof(ICollisionBehavior))]
@@ -39,16 +42,18 @@ namespace ASK.Runtime.Phys2D {
 
         private void Awake()
         {
-            _physModules = GetComponents<IPhysBehavior>();
-            _collisionModules = GetComponents<ICollisionBehavior>();
             _squishBehavior = GetComponent<ISquishBehavior>();
         }
         
         private void FixedUpdate()
         {
+            _physState = ResetPhysState(_physState);
+            
             var surroundings = CheckCollisions(Vector2.down);
+            
             foreach (var module in _physModules)
             {
+                if (module == null) continue;
                 _physState = module.ProcessSurroundings(_physState, surroundings, Vector2.down);
             }
             
@@ -128,7 +133,7 @@ namespace ASK.Runtime.Phys2D {
             {
                 _physState = module.OnCollide(_physState, p, direction);
             }
-            return _physState.Collided;
+            return _physState.collided;
         }
 
         /*public virtual bool PlayerCollide(Actor p, Vector2 direction) {
@@ -141,6 +146,13 @@ namespace ASK.Runtime.Phys2D {
         }
 
         public bool Squish(PhysObj p, Vector2 d) => _squishBehavior.Squish(p, d);
+        
+        private PhysState ResetPhysState(PhysState p)
+        {
+            p.collided = false;
+            p.grounded = false;
+            return p;
+        }
 
         /**
          * Gets the physObj underneath this PhysObj's feet.

@@ -1,10 +1,10 @@
 using System;
 using System.Linq;
 using ASK.Core;
-using ASK.Editor.Standalone;
+using ASK.Runtime.Phys2D.Behaviors;
 using UnityEngine;
 
-namespace ASK.Runtime.Phys2D.Behaviors
+namespace ASK.Runtime.Phys2D.Defaults
 {
     [Serializable]
     public class GravityPhysBehavior : IPhysBehavior
@@ -13,14 +13,12 @@ namespace ASK.Runtime.Phys2D.Behaviors
         [SerializeField] protected float GravityUp;
         [SerializeField] protected float MaxFall;
 
-        [SerializeField] private bool _grounded;
-
         public PhysState ProcessSurroundings(PhysState p, PhysObj[] surroundings, Vector2 direction)
         {
             if (direction.y >= 0) return p;
 
-            p.Grounded = ComputeGrounded(surroundings);
-            if (!_grounded) p.velocity.y = Fall(p.velocity.y);
+            p.grounded = ComputeGrounded(surroundings);
+            if (!p.grounded) p.velocity.y = Fall(p.velocity.y);
             return p;
         }
 

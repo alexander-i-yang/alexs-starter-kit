@@ -1,6 +1,7 @@
+using ASK.Runtime.Phys2D.Behaviors;
 using UnityEngine;
 
-namespace ASK.Runtime.Phys2D.Behaviors
+namespace ASK.Runtime.Phys2D.Defaults
 {
     public class GravityCollisionBehavior : ICollisionBehavior
     {
@@ -10,9 +11,9 @@ namespace ASK.Runtime.Phys2D.Behaviors
             Wall g = physObj.GetComponent<Wall>();
             if (g != null)
             {
-                physState.Collided = true;
+                physState.collided = true;
                 physState.velocity.y = 0;
-                physState.Grounded = true;
+                physState.grounded = true;
             }
 
             return physState;
