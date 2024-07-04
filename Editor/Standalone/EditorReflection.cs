@@ -2,14 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using ASK.Animation;
-using ASK.Runtime.Phys2D;
-using MyBox;
 using MyBox.EditorTools;
 using UnityEditor;
-using UnityEngine;
 
-namespace ASK.Editor.Utils
+namespace ASK.Editor.Standalone
 {
     public static class EditorReflection
     {
@@ -18,9 +14,9 @@ namespace ASK.Editor.Utils
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IEnumerable<Type> ImplementableTypes<T>()
+        public static IEnumerable<Type> ImplementableTypes(Type T)
         {
-            var derived = FindDerivedTypes<T>();
+            var derived = FindDerivedTypes(T);
             return derived.Where(t => t.IsClass && !t.IsAbstract);
         }
         
@@ -29,7 +25,7 @@ namespace ASK.Editor.Utils
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IEnumerable<Type> FindDerivedTypes<T>()
+        public static IEnumerable<Type> FindDerivedTypes(Type T)
         {
             var allAssemblies = AppDomain.CurrentDomain.GetAssemblies();
             List<Type> ret = new();
@@ -37,7 +33,7 @@ namespace ASK.Editor.Utils
             {
                 foreach (var t in assembly.GetTypes())
                 {
-                    if (typeof(T).IsAssignableFrom(t)) ret.Add(t);
+                    if (T.IsAssignableFrom(t)) ret.Add(t);
                 }
             }
             return ret;

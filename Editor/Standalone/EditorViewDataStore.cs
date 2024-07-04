@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 
-namespace ASK.Editor.Utils
+namespace ASK.Editor.Standalone
 {
     public abstract class EditorViewData {}
     

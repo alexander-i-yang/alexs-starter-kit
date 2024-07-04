@@ -1,8 +1,7 @@
 using System;
 using System.Linq;
 using ASK.Core;
-using MyBox;
-using UnityEditor;
+using ASK.Editor.Standalone;
 using UnityEngine;
 
 namespace ASK.Runtime.Phys2D.Behaviors

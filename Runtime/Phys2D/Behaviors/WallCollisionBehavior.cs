@@ -4,7 +4,7 @@ namespace ASK.Runtime.Phys2D.Behaviors
 {
     public class WallCollisionBehavior : ICollisionBehavior
     {
-        public override PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
+        public PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
         {
             Wall wall = physObj.GetComponent<Wall>();
             if (wall != null) physState.Collided = true;

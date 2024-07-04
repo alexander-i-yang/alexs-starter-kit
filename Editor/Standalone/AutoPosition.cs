@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace ASK.Editor.Utils
+namespace ASK.Editor.Standalone
 {
     public static class AutoPosition
     {

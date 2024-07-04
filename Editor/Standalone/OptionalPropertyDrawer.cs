@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace ASK.Editor
+namespace ASK.Editor.Standalone
 {
     [CustomPropertyDrawer(typeof(Optional<>))]
     public class OptionalPropertyDrawer : PropertyDrawer

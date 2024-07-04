@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using ASK.Core;
+using ASK.Editor;
+using ASK.Editor.Standalone;
 using ASK.Runtime.Phys2D.Behaviors;
 using UnityEngine;
 
@@ -11,9 +14,13 @@ namespace ASK.Runtime.Phys2D {
         private Hitbox _myHitbox;
         [SerializeField] private PhysState _physState;
 
-        [SerializeReference] private IPhysBehavior[] _physModules;
+        [SerializeReference]
+        [ChilrdenClassesDropdown(typeof(IPhysBehavior))]
+        private IPhysBehavior[] _physModules;
 
-        [SerializeReference] private ICollisionBehavior[] _collisionModules;
+        [SerializeReference]
+        [ChilrdenClassesDropdown(typeof(ICollisionBehavior))]
+        private ICollisionBehavior[] _collisionModules;
         
         private ISquishBehavior _squishBehavior;
         

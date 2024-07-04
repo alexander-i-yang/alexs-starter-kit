@@ -4,7 +4,7 @@ namespace ASK.Runtime.Phys2D.Behaviors
 {
     public class GravityCollisionBehavior : ICollisionBehavior
     {
-        public override PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
+        public PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
         {
             if (direction.y >= 0) return physState;
             Wall g = physObj.GetComponent<Wall>();

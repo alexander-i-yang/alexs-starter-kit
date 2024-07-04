@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 
-namespace ASK.Editor
+namespace ASK.Editor.Standalone
 {
     [CustomPropertyDrawer(typeof(ShowIfAttribute), true)]
     public class ShowIfAttributeDrawer : PropertyDrawer
