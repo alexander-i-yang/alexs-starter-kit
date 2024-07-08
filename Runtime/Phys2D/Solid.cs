@@ -22,15 +22,16 @@ namespace ASK.Runtime.Phys2D {
                     if (ridingActors.Contains(collidingActor)) {
                         ridingActors.Remove(collidingActor);
                     }
-                    collidingActor.Push(direction, this);
+                    collidingActor.PushSquish(direction, this);
                 }
 
+                transform.position += new Vector3((int)direction.x, (int)direction.y, 0);
+                
                 //Ride actors
                 foreach (var a in ridingActors) {
                     a.Ride(direction);
                 }
                 
-                transform.position += new Vector3((int)direction.x, (int)direction.y, 0);
                 remainder -= 1;
             }
             

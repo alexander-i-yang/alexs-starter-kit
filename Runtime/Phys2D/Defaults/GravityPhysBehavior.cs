@@ -3,20 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using ASK.Core;
 using ASK.Runtime.Phys2D.Behaviors;
+using MyBox;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ASK.Runtime.Phys2D.Defaults
 {
     [Serializable]
     public class GravityPhysBehavior : IPhysBehavior
     {
-        [SerializeField] protected float GravityDown;
-        [SerializeField] protected float GravityUp;
-        [SerializeField] protected float MaxFall;
+        [SerializeField]
+        [PositiveValueOnly]
+        protected float gravityDown;
+        
+        [PositiveValueOnly]
+        [SerializeField] protected float gravityUp;
+        
+        [PositiveValueOnly]
+        [SerializeField]
+        protected float maxFall;
 
-        public PhysState ProcessSurroundings(PhysState p, Dictionary<Vector2, PhysObj[]> surroundings)
+        /*[SerializeField]
+        protected Vector2 direction;*/
+
+        public PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj[]> surroundings)
         {
-            var surroundingsDown = surroundings[Vector2.down];
+            var surroundingsDown = surroundings[Direction.Down];
             
             p.grounded = ComputeGrounded(surroundingsDown);
             if (!p.grounded) p.velocity.y = Fall(p.velocity.y);
@@ -30,16 +42,16 @@ namespace ASK.Runtime.Phys2D.Defaults
         }
         
         public virtual float Fall(float vy) { 
-            return Math.Max(MaxFall, vy + EffectiveGravity(vy) * Game.TimeManager.FixedDeltaTime);
+            return Math.Max(-maxFall, vy - EffectiveGravity(vy) * Game.TimeManager.FixedDeltaTime);
         }
 
-        protected float EffectiveGravity(float velocityY) => (velocityY > 0 ? GravityUp : GravityDown);
+        protected float EffectiveGravity(float velocityY) => (velocityY > 0 ? gravityUp : gravityDown);
 
         public void FlipGravity()
         {
             throw new NotImplementedException();
-            GravityDown *= -1;
-            GravityUp *= -1;
+            gravityDown *= -1;
+            gravityUp *= -1;
         }
     }
 }

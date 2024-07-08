@@ -36,37 +36,30 @@ namespace ASK.Runtime.Phys2D {
             int remainder = magnitude;
             Actor[] allActors = AllActors();
             // If the actor moves at least 1 pixel, Move one pixel at a time
-            while (remainder > 0) {
-                var collides = CheckCollisions(direction);
+            while (remainder > 0)
+            {
+                var collisions = CheckCollisions<PhysObj>(direction);
                 bool collision = false;
                 
-                HashSet<PhysObj> ridingActors = new HashSet<PhysObj>(allActors.Where(c => c.IsRiding(this)));
-                
-                foreach (PhysObj p in collides)
+                HashSet<Actor> ridingActors = new HashSet<Actor>(allActors.Where(c => c.IsRiding(this)));
+
+                foreach (var collideObj in collisions)
                 {
-                    /*if (ridingActors.Contains(p))
-                    {
-                        //TODO
-                        p.Push(direction, this);
-                        ridingActors.Remove(p);
-                        continue;
-                    }*/
-                    
-                    if (onCollide(p, direction))
+                    if (onCollide(collideObj, direction))
                     {
                         collision = true;
                         break;
                     }
                 }
+
+                if (collision) return true;
+                
+                transform.position += new Vector3((int)direction.x, (int)direction.y, 0);
                 
                 foreach (var a in ridingActors) {
                     a.Ride(direction);
                 }
                 
-                if (collision) {
-                    return true;
-                }
-                transform.position += new Vector3((int)direction.x, (int)direction.y, 0);
                 remainder--;
             }
             
@@ -74,12 +67,14 @@ namespace ASK.Runtime.Phys2D {
         }
 
         #region Jostling
-        
-        /*public void BonkHead() {
-            velocityY = Math.Min(BonkHeadV, velocityY);
+        public bool PushSquish(Vector2 direction, PhysObj pusher)
+        {
+            return MoveGeneral(direction, 1, (ps, ds) => {
+                if (OnCollide(ps, ds)) return Squish(ps, ds);
+                return false;
+            });
         }
-
-        public void Land()
+        /*public void Land()
         {
             OnLand.Invoke();
             velocityY = 0;

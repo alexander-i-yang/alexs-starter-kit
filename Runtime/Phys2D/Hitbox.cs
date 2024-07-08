@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using ASK.Helpers;
 using MyBox;
 using UnityEditor;
@@ -118,7 +119,34 @@ namespace ASK.Runtime.Phys2D
         {
             //BoxDrawer.DrawHitboxHandles(this, new Color(1,0.5f,0.4f));
             BoxDrawer.FillHitbox(this, GizmoColor.WithAlphaSetTo(0.05f), GizmoColor);
+
+            AddPickHandlers();
         }
+
+        private bool _didAddPickHandlers = false;
+        
+        private void AddPickHandlers()
+        {
+            HandleUtility.PickGameObjectCallback e = OnPickGameObjectCustomPasses;
+            HandleUtility.pickGameObjectCustomPasses += e;
+        }
+        
+        GameObject OnPickGameObjectCustomPasses ( Camera cam , int layers , Vector2 position , GameObject[] ignore , GameObject[] filter , out int materialIndex )
+        {
+            _didAddPickHandlers = true;
+            materialIndex = -1;
+            if (this == null) return null;
+            
+            if (layers != -1 && (gameObject.layer & layers) == 0) return null;
+            if (ignore != null && ignore.Contains(gameObject)) return null;
+            if (filter != null && !filter.Contains(gameObject)) return null;
+            
+            var ray = cam.ScreenToWorldPoint( position );
+            //Bounds b = new Bounds((Vector3)_hitbox.Center + _hitbox.transform.position, new Vector3(_hitbox.Size.x, _hitbox.Size.y, 1000000));
+            bool hit = GlobalContains(ray);
+            return hit ? gameObject : null;
+        }
+        
         #endif
 
         /// <summary>

@@ -243,8 +243,9 @@ namespace ASK.Helpers {
             return points;
         }
 
-        public static Vector3[] ToVector3(this Vector2[] p) {
-            return Array.ConvertAll(p, item => (Vector3)item);
+        public static IEnumerable<Vector3> ToVector3(this IEnumerable<Vector2> p)
+        {
+            return p.Select(v => (Vector3)v);
         }
 
         public static String ValuesToString(this Vector2[] p) {
@@ -254,6 +255,9 @@ namespace ASK.Helpers {
             }
             return ret;
         }
+
+        public static IEnumerable<Vector2> Offset(this IEnumerable<Vector2> p, Vector2 o) =>
+            p.Select(v => v + o);
 
         public static T[] Slice<T>(this T[] arr, int from, int len) {
             return new System.ArraySegment<T>(arr, 0, len).ToArray();

@@ -8,7 +8,9 @@ using ASK.Editor.Standalone;
 using ASK.Runtime.Phys2D.Behaviors;
 using ASK.Runtime.Phys2D.Defaults;
 using UnityEditor;
+using UnityEditor.EditorTools;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace ASK.Runtime.Phys2D
 {
@@ -29,9 +31,7 @@ namespace ASK.Runtime.Phys2D
         [ChilrdenClassesDropdown(typeof(ICollisionBehavior))]
         private ICollisionBehavior[] _collisionModules;
 
-        [SerializeReference]
-        [ChilrdenClassesDropdown(typeof(IPhysProperty))]
-        private IPhysProperty[] _properties;
+        private PhysProperty[] _properties;
 
         private ISquishBehavior _squishBehavior;
 
@@ -49,10 +49,13 @@ namespace ASK.Runtime.Phys2D
         private void Awake()
         {
             _squishBehavior = GetComponent<ISquishBehavior>();
+            _properties = GetComponents<PhysProperty>();
         }
 
         private void FixedUpdate()
         {
+            // if (SelectedInEditor()) return;
+            
             _physState = ResetPhysState(_physState);
             var surroundings = GetSurroundings();
             foreach (var module in _physModules)
@@ -64,14 +67,14 @@ namespace ASK.Runtime.Phys2D
             Move(_physState.velocity * Game.TimeManager.FixedDeltaTime);
         }
 
-        private Dictionary<Vector2, PhysObj[]> GetSurroundings()
+        private Dictionary<Direction, PhysObj[]> GetSurroundings()
         {
-            return new Dictionary<Vector2, PhysObj[]>
+            return new Dictionary<Direction, PhysObj[]>
             {
-                { Vector2.left, CheckCollisions(Vector2.left) },
-                { Vector2.right, CheckCollisions(Vector2.right) },
-                { Vector2.up, CheckCollisions(Vector2.up) },
-                { Vector2.down, CheckCollisions(Vector2.down) },
+                { Direction.Left, CheckCollisions(Vector2.left) },
+                { Direction.Right, CheckCollisions(Vector2.right) },
+                { Direction.Up, CheckCollisions(Vector2.up) },
+                { Direction.Down, CheckCollisions(Vector2.down) },
             };
         }
 
@@ -155,6 +158,7 @@ namespace ASK.Runtime.Phys2D
         // public abstract bool Collidable(PhysObj collideWith);
         public bool OnCollide(PhysObj p, Vector2 direction)
         {
+            if (p == this) return false;
             p.OnCollideWith(this, direction);
             foreach (var module in _collisionModules)
             {
@@ -177,14 +181,6 @@ namespace ASK.Runtime.Phys2D
         public bool IsRiding(PhysObj p) => _physState.ridingOn.Contains(p);
 
         public bool Squish(PhysObj p, Vector2 d) => _squishBehavior.Squish(p, d);
-
-        public bool Push(Vector2 direction, PhysObj pusher)
-        {
-            return MoveGeneral(direction, 1, (ps, ds) => {
-                if (ps != pusher && OnCollide(ps, ds)) return Squish(ps, ds);
-                return false;
-            });
-        }
         
         private PhysState ResetPhysState(PhysState p)
         {
@@ -202,6 +198,14 @@ namespace ASK.Runtime.Phys2D
                 $"Velocity: <{(int)_physState.velocity.x}, {(int)_physState.velocity.y}>");
         }
         #endif
+
+        /*private bool SelectedInEditor()
+        {
+            #if UNITY_EDITOR
+            return Selection.activeGameObject == gameObject && Tools.current == Tool.Move;
+            #endif
+            return false;
+        }*/
 
         /**
          * Gets the physObj underneath this PhysObj's feet.

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using ASK.Helpers;
 using ASK.Runtime.Phys2D;
 using UnityEditor;
@@ -17,11 +16,10 @@ namespace ASK.Editor
         private Vector2 _snapBy = Vector2.one;
 
         private float _cornerHandleMargin = 0.2f;
-
+        
         private void OnEnable()
         {
             _hitbox = (Hitbox)target;
-            AddPickHandlers();
         }
 
         public override void OnInspectorGUI()
@@ -31,7 +29,7 @@ namespace ASK.Editor
             _center = _hitbox.Center;
             _center = EditorGUILayout.Vector2Field("Center", _center);
             _snapBy = EditorGUILayout.Vector2Field("Snap by", _snapBy);
-
+            
             DrawZeroCenterButton();
             
             EditorGUI.BeginChangeCheck();
@@ -89,28 +87,6 @@ namespace ASK.Editor
                 Undo.RecordObject(this, "Change hitbox bounds");
                 updateFunction(newPos);
             }
-        }
-
-        private void AddPickHandlers()
-        {
-            HandleUtility.PickGameObjectCallback e = OnPickGameObjectCustomPasses;
-            HandleUtility.pickGameObjectCustomPasses += e;
-        }
-        
-        GameObject OnPickGameObjectCustomPasses ( Camera cam , int layers , Vector2 position , GameObject[] ignore , GameObject[] filter , out int materialIndex )
-        {
-            materialIndex = -1;
-            if (_hitbox == null) return null;
-            
-            GameObject gameObject = _hitbox.gameObject;
-            if (layers != -1 && (gameObject.layer & layers) == 0) return null;
-            if (ignore != null && ignore.Contains(gameObject)) return null;
-            if (filter != null && !filter.Contains(gameObject)) return null;
-            
-            var ray = cam.ScreenToWorldPoint( position );
-            //Bounds b = new Bounds((Vector3)_hitbox.Center + _hitbox.transform.position, new Vector3(_hitbox.Size.x, _hitbox.Size.y, 1000000));
-            bool hit = _hitbox.GlobalContains(ray);
-            return hit ? gameObject : null;
         }
     }
 }
