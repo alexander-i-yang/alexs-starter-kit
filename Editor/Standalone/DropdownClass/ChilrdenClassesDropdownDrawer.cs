@@ -60,7 +60,7 @@ namespace ASK.Editor.Standalone
 
         private void DrawPopup(Rect position, SerializedProperty property, PViewData viewData)
         {
-            var style = EditorStyles.popup;
+            var style = new GUIStyle(EditorStyles.popup);
 
             style.fixedHeight = 18 + POPUP_PADDING;
             style.richText = true;
