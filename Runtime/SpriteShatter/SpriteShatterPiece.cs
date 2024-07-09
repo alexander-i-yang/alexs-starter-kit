@@ -1,4 +1,6 @@
-using Haze;
+using System.Linq;
+using ASK.Runtime.Helpers;
+using TriangleNet.Topology;
 using UnityEngine;
 
 namespace ASK.Runtime.SpriteShatter
@@ -9,17 +11,17 @@ namespace ASK.Runtime.SpriteShatter
         private static readonly int B = Shader.PropertyToID("_TriangleB");
         private static readonly int C = Shader.PropertyToID("_TriangleC");
         
-        public virtual void Init(Sprite sprite, Triangulator.Triangle triangle)
+        public virtual void Init(Sprite sprite, Triangle triangle)
         {
             var col = GetComponent<PolygonCollider2D>();
-            col.points = triangle.arr;
+            col.points = triangle.Points().ToArray();
             
             var sr = GetComponent<SpriteRenderer>();
             sr.sprite = sprite;
             triangle = Normalize(sprite, triangle);
-            sr.material.SetVector(A, triangle.a);
-            sr.material.SetVector(B, triangle.b);
-            sr.material.SetVector(C, triangle.c);
+            sr.material.SetVector(A, triangle.A.ToVector2());
+            sr.material.SetVector(B, triangle.B.ToVector2());
+            sr.material.SetVector(C, triangle.C.ToVector2());
         }
         
         /// <summary>
@@ -27,12 +29,12 @@ namespace ASK.Runtime.SpriteShatter
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        private Triangulator.Triangle Normalize(Sprite sprite, Triangulator.Triangle t)
+        private Triangle Normalize(Sprite sprite, Triangle t)
         {
             Vector2 extents = sprite.bounds.extents;
-            t.a = (extents + t.a) / (extents * 2);
-            t.b = (extents + t.b) / (extents * 2);
-            t.c = (extents + t.c) / (extents * 2);
+            t.A = ((extents + t.A.ToVector2()) / (extents * 2)).ToVertex();
+            t.B = ((extents + t.B.ToVector2()) / (extents * 2)).ToVertex();
+            t.C = ((extents + t.C.ToVector2()) / (extents * 2)).ToVertex();
             return t;
         }
     }

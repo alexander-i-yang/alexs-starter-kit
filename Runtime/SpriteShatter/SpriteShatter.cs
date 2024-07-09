@@ -1,6 +1,7 @@
+using ASK.Runtime.Helpers;
 using UnityEngine;
-using Haze;
 using MyBox;
+using TriangleNet.Topology;
 
 namespace ASK.Runtime.SpriteShatter
 {
@@ -25,7 +26,7 @@ namespace ASK.Runtime.SpriteShatter
             triangles.ForEach(CreatePiece);
         }
 
-        public void CreatePiece(Triangulator.Triangle t)
+        public void CreatePiece(Triangle t)
         {
             var clon = Instantiate(clone, transform.position, Quaternion.identity);
 

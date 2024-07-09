@@ -5,7 +5,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using Haze;
+using UnityEngine;
 
 namespace TriangleNet.Topology
 {
@@ -15,6 +15,7 @@ namespace TriangleNet.Topology
     /// <summary>
     /// The triangle data structure.
     /// </summary>
+    [Serializable]
     public class Triangle : ITriangle
     {
         // Hash for dictionary. Will be set by mesh instance.
@@ -24,10 +25,29 @@ namespace TriangleNet.Topology
         internal int id;
 
         internal Otri[] neighbors;
-        internal Vertex[] vertices;
+        public Vertex[] vertices { get; }
         internal Osub[] subsegs;
         internal int label;
         internal double area;
+
+        public Vertex A
+        {
+            get => vertices[0];
+            set => vertices[0] = value;
+        }
+        
+        public Vertex B
+        {
+            get => vertices[1];
+            set => vertices[1] = value;
+        }
+        
+        public Vertex C
+        {
+            get => vertices[2];
+            set => vertices[2] = value;
+        }
+
         internal bool infected;
 
         /// <summary>
@@ -134,11 +154,6 @@ namespace TriangleNet.Topology
         public override string ToString()
         {
             return string.Format("TID {0}", hash);
-        }
-
-        public Triangulator.Triangle ToTriangulatorTriangle()
-        {
-            return new Triangulator.Triangle(vertices[0], vertices[1], vertices[2]);
         }
     }
 }
