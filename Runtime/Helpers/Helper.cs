@@ -259,6 +259,18 @@ namespace ASK.Helpers {
         public static IEnumerable<Vector2> Offset(this IEnumerable<Vector2> p, Vector2 o) =>
             p.Select(v => v + o);
 
+        public static Vector2 Average(this IEnumerable<Vector2> vs)
+        {
+            Vector2 ret = Vector2.zero;
+            int cnt = 0;
+            foreach (var v in vs)
+            {
+                ret += v;
+                cnt++;
+            }
+            return ret / cnt;
+        }
+
         public static T[] Slice<T>(this T[] arr, int from, int len) {
             return new System.ArraySegment<T>(arr, 0, len).ToArray();
         }

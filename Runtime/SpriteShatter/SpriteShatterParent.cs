@@ -8,27 +8,39 @@ namespace ASK.Runtime.SpriteShatter
 {
     public interface IShatterPiece
     {
-        void Init(Sprite sprite, Triangle triangle);
+        void Init(Sprite sprite, Triangle[] triangles);
         void ApplyForce(Vector2 force);
+        public Triangle[] GetTriangles();
     }
 
-    public class SpriteShatterPiece : MonoBehaviour, IShatterPiece
+    public class SpriteShatterParent : MonoBehaviour, IShatterPiece
     {
         private static readonly int A = Shader.PropertyToID("_TriangleA");
         private static readonly int B = Shader.PropertyToID("_TriangleB");
         private static readonly int C = Shader.PropertyToID("_TriangleC");
+
+        public GameObject spriteShatterPiece;
+
+        private Triangle[] _triangles;
         
-        public virtual void Init(Sprite sprite, Triangle triangle)
+        public virtual void Init(Sprite sprite, Triangle[] triangles)
         {
-            var col = GetComponent<PolygonCollider2D>();
-            col.points = triangle.Points().ToArray();
+            _triangles = triangles;
+            foreach (var triangle in triangles)
+            {
+                var newObj =
+                    Instantiate(spriteShatterPiece, transform.position, Quaternion.identity, transform);
+                
+                var col = newObj.GetComponent<PolygonCollider2D>();
+                col.points = triangle.Points().ToArray();
             
-            var sr = GetComponent<SpriteRenderer>();
-            sr.sprite = sprite;
-            triangle = Normalize(sprite, triangle);
-            sr.material.SetVector(A, triangle.A.ToVector2());
-            sr.material.SetVector(B, triangle.B.ToVector2());
-            sr.material.SetVector(C, triangle.C.ToVector2());
+                var sr = newObj.GetComponent<SpriteRenderer>();
+                sr.sprite = sprite;
+                var normTriangle = Normalize(sprite, triangle);
+                sr.material.SetVector(A, normTriangle.A.ToVector2());
+                sr.material.SetVector(B, normTriangle.B.ToVector2());
+                sr.material.SetVector(C, normTriangle.C.ToVector2());
+            }
         }
         
         /// <summary>
@@ -79,5 +91,7 @@ namespace ASK.Runtime.SpriteShatter
         {
             GetComponent<Rigidbody2D>().AddForce(force);
         }
+
+        public Triangle[] GetTriangles() => _triangles;
     }
 }

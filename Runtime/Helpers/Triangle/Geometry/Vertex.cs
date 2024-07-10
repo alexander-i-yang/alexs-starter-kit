@@ -12,6 +12,7 @@ namespace TriangleNet.Geometry
     /// <summary>
     /// The vertex data structure.
     /// </summary>
+    [Serializable]
     public class Vertex : Point
     {
         // Hash for dictionary. Will be set by mesh instance.

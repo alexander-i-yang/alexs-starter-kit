@@ -48,8 +48,14 @@ namespace ASK.Runtime.Helpers
             {
                 var pts = triangles[i];
                 Handles.color = new Color(1, 0, 0, colors == null ? 1 : colors[i]);
-                Handles.DrawAAConvexPolygon(pts.Append(pts[0]).Select(v => v.ToVector2()).Offset(offset).ToVector3()
-                    .ToArray());
+                Handles.DrawAAConvexPolygon(
+                    pts.Append(pts[0])
+                        .Where(p => p!=null)
+                        .Select(v => v.ToVector2())
+                        .Offset(offset)
+                        .ToVector3()
+                        .ToArray()
+                    );
             }
         }
 
