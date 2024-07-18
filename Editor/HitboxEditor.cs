@@ -31,6 +31,8 @@ namespace ASK.Editor
             _snapBy = EditorGUILayout.Vector2Field("Snap by", _snapBy);
             
             DrawZeroCenterButton();
+
+            DrawSyncButton();
             
             EditorGUI.BeginChangeCheck();
             ((Hitbox)target).Center = _center;
@@ -44,6 +46,17 @@ namespace ASK.Editor
                 //TODO: snap size to integer values
                 _center = Vector2.zero;
                 Repaint();
+            }
+        }
+
+        private void DrawSyncButton()
+        {
+            if (GUILayout.Button("Sync"))
+            {
+                var col = _hitbox.GetComponent<BoxCollider2D>();
+                col.size = _hitbox.Bounds.size;
+                var sr = _hitbox.GetComponentInChildren<SpriteRenderer>();
+                sr.transform.localScale = _hitbox.Bounds.size / new Vector2(8, 8); 
             }
         }
 

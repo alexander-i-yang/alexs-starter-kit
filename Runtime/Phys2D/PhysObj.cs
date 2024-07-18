@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using ASK.Core;
-using ASK.Editor;
+#if UNITY_EDITOR
 using ASK.Editor.Standalone;
+#endif
 using ASK.Runtime.Phys2D.Behaviors;
 using ASK.Runtime.Phys2D.Defaults;
-using UnityEditor;
-using UnityEditor.EditorTools;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace ASK.Runtime.Phys2D
 {
@@ -21,15 +18,17 @@ namespace ASK.Runtime.Phys2D
         [SerializeField] private PhysState _physState;
 
         [SerializeReference]
+        #if UNITY_EDITOR
         [ChilrdenClassesDropdown(typeof(IPhysBehavior))]
+        #endif
         private IPhysBehavior[] _physModules =
         {
             new GravityPhysBehavior()
         };
 
-        [SerializeReference]
-        [ChilrdenClassesDropdown(typeof(ICollisionBehavior))]
-        private ICollisionBehavior[] _collisionModules;
+        //[SerializeReference]
+        //[ChilrdenClassesDropdown(typeof(CollisionBehavior))]
+        private CollisionBehavior[] _collisionModules;
 
         private PhysProperty[] _properties;
 
@@ -44,14 +43,21 @@ namespace ASK.Runtime.Phys2D
             }
         }
 
-        [SerializeField] private Vector2 _subPixels = Vector2.zero;
+        [SerializeField] public Vector2 SubPixels { get; private set; } = Vector2.zero;
 
         private void Awake()
         {
             _squishBehavior = GetComponent<ISquishBehavior>();
             _properties = GetComponents<PhysProperty>();
+            _collisionModules = GetComponents<CollisionBehavior>();
         }
 
+        private void Update()
+        {
+            _physState.jumpPressed = Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Space) ||
+                                     Input.GetKeyDown(KeyCode.W);
+        }
+        
         private void FixedUpdate()
         {
             // if (SelectedInEditor()) return;
@@ -125,7 +131,7 @@ namespace ASK.Runtime.Phys2D
 
         protected void Move(Vector2 vel)
         {
-            vel += _subPixels;
+            vel += SubPixels;
             int moveX = (int)Math.Abs(vel.x);
             if (moveX != 0)
             {
@@ -141,7 +147,7 @@ namespace ASK.Runtime.Phys2D
             }
 
             Vector2 truncVel = new Vector2((int)vel.x, (int)vel.y);
-            _subPixels = vel - truncVel;
+            SubPixels = vel - truncVel;
         }
 
         public abstract bool MoveGeneral(Vector2 direction, int magnitude, Func<PhysObj, Vector2, bool> onCollide);
@@ -186,6 +192,8 @@ namespace ASK.Runtime.Phys2D
         {
             p.collided = false;
             p.grounded = false;
+            if (p.stun > 0) p.stun = Math.Max(0, p.stun - Game.TimeManager.FixedDeltaTime);
+            if (p.inv > 0) p.inv = Math.Max(0, p.inv - Game.TimeManager.FixedDeltaTime);
             return p;
         }
         
@@ -194,7 +202,8 @@ namespace ASK.Runtime.Phys2D
         #if UNITY_EDITOR
         private void OnDrawGizmosSelected()
         {
-            Handles.Label(transform.position,
+            
+            UnityEditor.Handles.Label(transform.position,
                 $"Velocity: <{(int)_physState.velocity.x}, {(int)_physState.velocity.y}>");
         }
         #endif
@@ -220,7 +229,7 @@ namespace ASK.Runtime.Phys2D
         //public int ColliderBottomY() => Convert.ToInt16(transform.position.y + myHitbox.offset.y - myHitbox.bounds.extents.y);
 
         //public int ColliderTopY() => Convert.ToInt16(transform.position.y + myHitbox.offset.y + myHitbox.bounds.extents.y);
-        public T GetProperty<T>() where T : class
+        public T GetProperty<T>() where T : PhysProperty
         {
             foreach (var p in _properties)
             {
@@ -232,5 +241,14 @@ namespace ASK.Runtime.Phys2D
 
             return default;
         }
+        
+        public void SetVelocity(Vector2 v)
+        {
+            _physState.velocity = v;
+        }
+
+        public Vector2 GetVelocity() => _physState.velocity;
+
+        public PhysState PhysState => _physState;
     }
 }

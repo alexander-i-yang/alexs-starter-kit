@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using ASK.Helpers;
+using Clipper2Lib;
 using TriangleNet.Geometry;
 using TriangleNet.Meshing;
 using TriangleNet.Topology;
 using UnityEditor;
 using UnityEngine;
+using Vertex = TriangleNet.Geometry.Vertex;
 
 namespace ASK.Runtime.Helpers
 {
@@ -18,7 +20,7 @@ namespace ASK.Runtime.Helpers
         /// <param name="mesh"></param>
         /// <param name="maxTriangleArea"></param>
         /// <returns></returns>
-        public static ICollection<Triangle> TriangulateAndNormalize(Vector2[] mesh, float maxTriangleArea)
+        public static ICollection<Triangle> Triangulate(Vector2[] mesh, float maxTriangleArea)
         {
             var poly = new Polygon();
 
@@ -43,7 +45,7 @@ namespace ASK.Runtime.Helpers
             if (triangles == null) return;
 
             if (offset == default) offset = Vector3.zero;
-
+            #if UNITY_EDITOR
             for (var i = 0; i < triangles.Length; i++)
             {
                 var pts = triangles[i];
@@ -58,6 +60,8 @@ namespace ASK.Runtime.Helpers
                 Handles.color = Color.white;
                 Handles.DrawAAPolyLine(drawPts);
             }
+            #endif
+
         }
 
         public static Vector2 ToVector2(this Vertex v) => new((float)v.x, (float)v.y);
@@ -105,12 +109,36 @@ namespace ASK.Runtime.Helpers
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static Triangle Normalize(Sprite sprite, Triangle t)
+        public static void Normalize(Sprite sprite, Triangle t)
         {
             t.A = Normalize(sprite, t.A);
             t.B = Normalize(sprite, t.B);
             t.C = Normalize(sprite, t.C);
-            return t;
+        }
+        
+        public static Point64 ToPoint64(this Vertex v)
+        {
+            return new Point64(v.x, v.y);
+        }
+
+        public static Vector2[] ToVectors(this Path64 p)
+        {
+            return p.Select(pt => new Vector2(pt.X, pt.Y)).ToArray();
+        }
+        
+        public static Vector2 FindNearestPointOnLine(Vector2 origin, Vector2 direction, Vector2 point)
+        {
+            direction.Normalize();
+            Vector2 lhs = point - origin;
+
+            float dotP = Vector2.Dot(lhs, direction);
+            return origin + direction * dotP;
+        }
+
+        public static float DistFromLine(Vector2 origin, Vector2 direction, Vector2 point)
+        {
+            Vector2 p = FindNearestPointOnLine(origin, direction, point);
+            return (p - point).magnitude;
         }
     }
 }

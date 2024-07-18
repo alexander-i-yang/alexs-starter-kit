@@ -1,18 +1,23 @@
+using System.Collections.Generic;
 using System.Linq;
+using ASK.Core;
 using ASK.Runtime.Helpers;
+using Clipper2Lib;
+using MyBox;
 using TriangleNet.Topology;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ASK.Runtime.SpriteShatter
 {
-    public interface IShatterPiece
+    public abstract class IShatterPiece : Particle
     {
-        void Init(Sprite sprite, Triangle[] triangles);
-        void ApplyForce(Vector2 force);
-        public Triangle[] GetTriangles();
+        public abstract void Init(Sprite sprite, Triangle[] triangles);
+        public abstract void ApplyForce(Vector2 force);
+        public abstract Triangle[] GetTriangles();
     }
 
-    public class SpriteShatterParent : MonoBehaviour, IShatterPiece
+    public class SpriteShatterParent : IShatterPiece
     {
         private static readonly int A = Shader.PropertyToID("_TriangleA");
         private static readonly int B = Shader.PropertyToID("_TriangleB");
@@ -23,26 +28,55 @@ namespace ASK.Runtime.SpriteShatter
         private Triangle[] _triangles;
 
         private Rigidbody2D _rb;
+
+        [SerializeField]
+        private float delayFade;
         
-        public virtual void Init(Sprite sprite, Triangle[] triangles)
+        [FormerlySerializedAs("delayTime")] [SerializeField]
+        private float fadeTime;
+
+        private float awakeTime;
+        private List<SpriteRenderer> _srs;
+        
+        public override void Init(Sprite sprite, Triangle[] triangles)
         {
             _rb = GetComponent<Rigidbody2D>();
             _triangles = triangles;
+            //Paths64 paths = new Paths64();
+            _srs = new List<SpriteRenderer>();
+
             foreach (var triangle in triangles)
             {
                 var newObj =
                     Instantiate(spriteShatterPiece, transform.position, Quaternion.identity, transform);
+
+                /*paths.Add(new Path64(new Point64[]
+                {
+                    triangle.A.ToPoint64(),
+                    triangle.B.ToPoint64(),
+                    triangle.C.ToPoint64()
+                }));*/
                 
                 var col = newObj.GetComponent<PolygonCollider2D>();
                 col.points = triangle.Points().ToArray();
             
                 var sr = newObj.GetComponent<SpriteRenderer>();
+                _srs.Add(sr);
                 sr.sprite = sprite;
-                var normTriangle = Triangulator.Normalize(sprite, triangle);
-                sr.material.SetVector(A, normTriangle.A.ToVector2());
-                sr.material.SetVector(B, normTriangle.B.ToVector2());
-                sr.material.SetVector(C, normTriangle.C.ToVector2());
+
+                var normaA = Triangulator.Normalize(sprite, triangle.A).ToVector2();
+                var normaB = Triangulator.Normalize(sprite, triangle.B).ToVector2();
+                var normaC = Triangulator.Normalize(sprite, triangle.C).ToVector2();
+                
+                sr.material.SetVector(A, normaA);
+                sr.material.SetVector(B, normaB);
+                sr.material.SetVector(C, normaC);
             }
+            
+            /*var ret = Clipper2Lib.Clipper.Union(paths, FillRule.Positive);
+            Vector2[] v = ret[0].ToVectors();
+            gameObject.GetComponent<PolygonCollider2D>().points = v;*/
+            awakeTime = Game.TimeManager.Time;
         }
 
         private void FixedUpdate()
@@ -53,11 +87,31 @@ namespace ASK.Runtime.SpriteShatter
                 _rb.velocity = Vector2.zero;
         }
 
-        public void ApplyForce(Vector2 force)
+        void Update()
+        {
+            var t = ASK.Core.Game.TimeManager.Time;
+            if (t - awakeTime > delayFade)
+            {
+                float i = ((t - awakeTime) - delayFade)/fadeTime;
+                if (i > 1)
+                {
+                    Destroy(gameObject);
+                    //_srs.ForEach(sr => sr.gameObject.SetActive(false));
+                    //gameObject.SetActive(false);
+                }
+                else
+                {
+                    _srs.ForEach(sr => sr.SetAlpha(1 - i));
+                }
+            }
+        }
+
+        public override void ApplyForce(Vector2 force)
         {
             _rb.AddForce(force, ForceMode2D.Impulse);
         }
 
-        public Triangle[] GetTriangles() => _triangles;
+        public override Triangle[] GetTriangles() => _triangles;
+        public override bool IsActive() => gameObject.activeSelf;
     }
 }

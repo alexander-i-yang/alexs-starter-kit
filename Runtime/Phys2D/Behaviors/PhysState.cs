@@ -12,5 +12,8 @@ namespace ASK.Runtime.Phys2D.Behaviors
         public bool grounded;
 
         public PhysObj[] ridingOn;
+        public bool jumpPressed;
+        public float stun;
+        public float inv;
     }
 }

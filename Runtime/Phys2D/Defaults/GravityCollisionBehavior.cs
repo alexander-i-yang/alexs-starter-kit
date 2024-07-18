@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace ASK.Runtime.Phys2D.Defaults
 {
-    public class GravityCollisionBehavior : ICollisionBehavior
+    public class GravityCollisionBehavior : CollisionBehavior
     {
-        public PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
+        public override PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
         {
             if (direction.y >= 0) return physState;
             Ground g = physObj.GetProperty<Ground>();
