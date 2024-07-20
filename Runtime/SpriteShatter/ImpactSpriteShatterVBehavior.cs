@@ -1,3 +1,5 @@
+using System.Linq;
+using MyBox;
 using TriangleNet.Topology;
 using UnityEngine;
 
@@ -5,9 +7,13 @@ namespace ASK.Runtime.SpriteShatter
 {
     public class ImpactSpriteShatterVBehavior : ISpriteShatterVBehavior
     {
-        public float CalculateVelocity(Vector2 inputForce, Triangle triangle, Vector2 forcePosition, Vector2 trianglePosition)
+        [PositiveValueOnly]
+        public float MassMagnitude;
+        
+        public Vector2 CalculateVelocity(Triangle[] triangles, Vector2 forcePosition, Vector2 inputForce)
         {
-            return (forcePosition - trianglePosition).magnitude;
+            float area = triangles.Sum(t => t.CalcArea());
+            return inputForce.normalized * (MassMagnitude * area);
         }
     }
 }

@@ -6,6 +6,6 @@ namespace ASK.Runtime.SpriteShatter
 {
     public interface ISpriteShatterVBehavior
     {
-        public float CalculateVelocity(Vector2 inputForce, Triangle triangle, Vector2 forcePosition, Vector2 trianglePosition);
+        public Vector2 CalculateVelocity(Triangle[] triangles, Vector2 forcePosition, Vector2 inputForce);
     }
 }

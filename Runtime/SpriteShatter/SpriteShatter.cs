@@ -3,6 +3,7 @@ using System.Linq;
 using ASK.Core;
 #if UNITY_EDITOR
 using ASK.Editor.Standalone;
+using UnityEditor;
 #endif
 using ASK.Helpers;
 using ASK.Runtime.Helpers;
@@ -73,20 +74,20 @@ namespace ASK.Runtime.SpriteShatter
             Triangulate(grouper, forceRay);
             var flattenedGroups = FlattenGroups(d_groups);
 
-            
+            var pieces = new List<IShatterPiece>();
 
             foreach (var group in flattenedGroups)
             {
-                Game.ParticlePool.ReceiveParticle<IShatterPiece>(
+                var p = Game.ParticlePool.ReceiveParticle(
                     () => CreatePiece(group),
                     (p) => InitPiece(p, group)
                 );
+                pieces.Add(p);
             }
-            var pieces = flattenedGroups.Select(group => CreatePiece(group)).ToArray();
             
             foreach (var piece in pieces)
             {
-                piece.ApplyForce(ResolveForces(forceWorldOrigin, force, piece.GetTriangles()));
+                piece.ApplyForce(spriteShatterVBehavior.CalculateVelocity(piece.GetTriangles(), forceWorldOrigin, force));
             }
         }
 
@@ -152,23 +153,6 @@ namespace ASK.Runtime.SpriteShatter
         {
             p.Init(Sprite.sprite, triangles);
         }
-        
-        /// <summary>
-        /// Triangles are normalized according to sprite coordinates.
-        /// </summary>
-        /// <param name="force"></param>
-        /// <param name="forcePos"></param>
-        /// <param name="triangle"></param>
-        /// <returns></returns>
-        public Vector2 ResolveForces(Vector2 forcePos, Vector2 force, Triangle[] triangles)
-        {
-            Vector2 trianglePos = triangles.Select(t => t.Center()).Average();
-            var forceRay = new Ray2D(forcePos, force);
-            var l1 = forceRay.GetPoint(100);
-            var l2 = forceRay.GetPoint(-100);
-            float distanceFromLine = Triangulator.DistFromLine(trianglePos, l1, l2);
-            return force * (Mathf.Lerp(10, 0.25f, distanceFromLine)) + (trianglePos - forcePos)*force.magnitude*0.05f;
-        }
 
         public void Triangulate(IGrouper grouper, Ray2D forceRay)
         {
@@ -195,9 +179,6 @@ namespace ASK.Runtime.SpriteShatter
             e = forceRay.origin;
             UnityEditor.Handles.DrawLine(d_ForcePos, d_ForcePos+d_Force);
             
-            var l1 = forceRay.GetPoint(100);
-            var l2 = forceRay.GetPoint(-100);
-            
             float[] colors;
             //colors = d_triangles.Select(triangle => HandleUtility.DistancePointLine(triangle.Center(), l1, l2)/2).ToArray();
              if (d_selectedGroup == -1)
@@ -210,6 +191,34 @@ namespace ASK.Runtime.SpriteShatter
                  colors = d_triangles.Select(t => d_groups[t] == d_selectedGroup ? 1f : 0f).ToArray();
              }
             Triangulator.DrawTriangles(d_triangles, tPos, colors);
+
+            var flattened = FlattenGroups(d_groups);
+            
+            if (d_selectedGroup == -1)
+            {
+                foreach (var triangles in flattened)
+                {
+                    var center = triangles.Select(t => t.Center()).Average();
+                    Vector2 appliedForce = spriteShatterVBehavior.CalculateVelocity(triangles, d_ForcePos, d_Force);
+                    Helper.DrawArrow(
+                        (Vector3)center + transform.position,
+                        appliedForce,
+                        Color.yellow,
+                        0);
+                }
+            }
+            else
+            {
+                if (flattened.Length <= d_selectedGroup) return;
+                var triangles = flattened[d_selectedGroup];
+                var center = triangles.Select(t => t.Center()).Average();
+                Vector2 appliedForce = spriteShatterVBehavior.CalculateVelocity(triangles, d_ForcePos, d_Force);
+                Helper.DrawArrow(
+                    (Vector3)center + transform.position,
+                    appliedForce,
+                    Color.yellow,
+                    0);
+            }
         }
         #endif
         public Ray2D NormalizeWorldForce(Vector2 bulletPos, Vector2 realBulletv)

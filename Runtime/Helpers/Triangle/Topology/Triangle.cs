@@ -48,6 +48,11 @@ namespace TriangleNet.Topology
             set => vertices[2] = value;
         }
 
+        public float CalcArea()
+        {
+            return 0.5f * (float)Math.Abs(A.x * (B.y - C.y) + B.x * (C.y - B.y) + C.x * (A.y - B.y));
+        }
+
         internal bool infected;
 
         /// <summary>
