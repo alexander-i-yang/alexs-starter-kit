@@ -66,7 +66,8 @@ namespace ASK.Runtime.SpriteShatter
         {
             Shatter(d_ForcePos, d_Force, d_grouper);
         }
-        
+
+        public SpriteRenderer d_sprite;
         public void Shatter(Vector2 forceWorldOrigin, Vector2 force, IGrouper grouper)
         {
             var forceRay = NormalizeWorldForce(forceWorldOrigin, force);
@@ -78,6 +79,8 @@ namespace ASK.Runtime.SpriteShatter
 
             foreach (var group in flattenedGroups)
             {
+                if (group.Length < 2) continue;
+                
                 var p = Game.ParticlePool.ReceiveParticle(
                     () => CreatePiece(group),
                     (p) => InitPiece(p, group)
@@ -94,33 +97,6 @@ namespace ASK.Runtime.SpriteShatter
         [SerializeField]
         [PositiveValueOnly]
         private int maxGroupSize;
-        /*public Dictionary<Triangle, int> CalculateGroupsLookup(Triangle[] triangles)
-        {
-            Dictionary<Triangle, int> groupsLookup = new();
-
-            int groupNum = 0;
-            foreach (var triangle in triangles)
-            {
-                int groupSize = 0;
-                Queue<Triangle> q = new Queue<Triangle>();
-                q.Enqueue(triangle);
-                
-                while (q.Count > 0 && groupSize <= maxGroupSize)
-                {
-                    var groupTriangle = q.Dequeue();
-                    if (groupTriangle == null || groupTriangle.ID < 0 || groupsLookup.ContainsKey(groupTriangle)) continue;
-                    
-                    groupTriangle.neighbors.ForEach(o => q.Enqueue(o.Triangle));
-                    
-                    groupsLookup.Add(groupTriangle, groupNum);
-                    groupSize++;
-                }
-
-                groupNum++;
-            }
-
-            return groupsLookup;
-        }*/
         
         
 
@@ -141,7 +117,7 @@ namespace ASK.Runtime.SpriteShatter
 
         public IShatterPiece CreatePiece(Triangle[] triangles)
         {
-            var clon = Instantiate(clone, transform.position, Quaternion.identity).GetComponent<IShatterPiece>();
+            var clon = Instantiate(clone).GetComponent<IShatterPiece>();
 
             //TODO: look into Sprite.PhysicsShape
 
@@ -152,12 +128,20 @@ namespace ASK.Runtime.SpriteShatter
         public void InitPiece(IShatterPiece p, Triangle[] triangles)
         {
             p.Init(Sprite.sprite, triangles);
+            p.transform.position = transform.position;
         }
 
+        public uint d_gl = 3;
+        public float d_pr = 0.99f;
+        public Vector2[] d_pct;
         public void Triangulate(IGrouper grouper, Ray2D forceRay)
         {
             d_triangles = Triangulator.Triangulate(Mesh, MaxTriangleArea).ToArray();
             d_groups = grouper.CalculateGroupsLookup(d_triangles, forceRay);
+            
+            var ct = new ContourTracer();
+            ct.Trace(d_sprite.sprite.texture, Vector2.zero, 1, d_gl, d_pr, 0.1f);
+            d_pct = ct.GetPath(0);
         }
 
         public Vector2 e;
@@ -191,7 +175,7 @@ namespace ASK.Runtime.SpriteShatter
                  colors = d_triangles.Select(t => d_groups[t] == d_selectedGroup ? 1f : 0f).ToArray();
              }
             Triangulator.DrawTriangles(d_triangles, tPos, colors);
-
+            Handles.DrawPolyLine(d_pct.ToVector3().ToArray());
             var flattened = FlattenGroups(d_groups);
             
             if (d_selectedGroup == -1)

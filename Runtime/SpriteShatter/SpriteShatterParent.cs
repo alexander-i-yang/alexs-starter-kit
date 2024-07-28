@@ -42,6 +42,7 @@ namespace ASK.Runtime.SpriteShatter
         {
             _rb = GetComponent<Rigidbody2D>();
             _triangles = triangles;
+            gameObject.SetActive(true);
             //Paths64 paths = new Paths64();
             _srs = new List<SpriteRenderer>();
 
@@ -95,9 +96,9 @@ namespace ASK.Runtime.SpriteShatter
                 float i = ((t - awakeTime) - delayFade)/fadeTime;
                 if (i > 1)
                 {
-                    Destroy(gameObject);
-                    //_srs.ForEach(sr => sr.gameObject.SetActive(false));
-                    //gameObject.SetActive(false);
+                    //Destroy(gameObject);
+                    _srs.ForEach(sr => sr.gameObject.SetActive(false));
+                    gameObject.SetActive(false);
                 }
                 else
                 {
