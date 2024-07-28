@@ -31,11 +31,14 @@ namespace ASK.Helpers
                 hitbox.BottomRightGlobal,
                 hitbox.BottomLeftGlobal,
             };
+            #if UNITY_EDITOR
             Handles.DrawSolidRectangleWithOutline(verts, fillColor, outlineColor);
+            #endif
         }
 
         public static void DrawHitboxHandles(Hitbox h, Color col = default)
         {
+            #if UNITY_EDITOR
             if (col == default) col = Color.white;
             using (var scope = new Handles.DrawingScope())
             {
@@ -45,6 +48,7 @@ namespace ASK.Helpers
                 Handles.DrawLine(h.TopRightGlobal, h.TopLeftGlobal);
                 Handles.DrawLine(h.TopLeftGlobal, h.BottomLeftGlobal);
             }
+            #endif
         }
 
         public static void DrawBoxCastOnHit(Vector3 origin, Vector3 halfExtents, Quaternion orientation,

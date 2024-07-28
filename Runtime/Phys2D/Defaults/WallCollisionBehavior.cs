@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace ASK.Runtime.Phys2D.Defaults
 {
-    public class WallCollisionBehavior : ICollisionBehavior
+    public class WallCollisionBehavior : CollisionBehavior
     {
-        public PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
+        public override PhysState OnCollide(PhysState physState, PhysObj physObj, Vector2 direction)
         {
             Ground ground = physObj.GetProperty<Ground>();
             if (ground != null) physState.collided = true;

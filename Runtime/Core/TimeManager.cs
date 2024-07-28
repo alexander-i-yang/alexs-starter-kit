@@ -40,10 +40,14 @@ namespace ASK.Core
         private void FixedUpdate()
         {
             if (ResetNextFrameOffset != null) ResetNextFrameOffset();
-            FixedDeltaTime = Game.Instance.IsPaused ? 0 : UnityEngine.Time.fixedDeltaTime * GetTimeScale();
+
+            float fixedDeltaTime = UnityEngine.Time.fixedDeltaTime * GetTimeScale();
+            FixedDeltaTime = Game.Instance.IsPaused ? 0 : fixedDeltaTime;
             
             if (DebugBreak && _frameCount % stepFrames == 0) Debug.Break();
             _frameCount = (_frameCount + 1) % 10000;
+
+            if (Physics2D.simulationMode == SimulationMode2D.Script) Physics2D.Simulate(fixedDeltaTime);
         }
 
         public virtual Timescaler.TimeScale ApplyTimescale(float f, int priority)
