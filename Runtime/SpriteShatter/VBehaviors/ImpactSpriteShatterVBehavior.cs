@@ -3,7 +3,7 @@ using MyBox;
 using TriangleNet.Topology;
 using UnityEngine;
 
-namespace ASK.Runtime.SpriteShatter
+namespace ASK.Runtime.SpriteShatter.VBehaviors
 {
     public class ImpactSpriteShatterVBehavior : ISpriteShatterVBehavior
     {

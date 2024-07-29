@@ -2,7 +2,7 @@ using System;
 using TriangleNet.Topology;
 using UnityEngine;
 
-namespace ASK.Runtime.SpriteShatter
+namespace ASK.Runtime.SpriteShatter.VBehaviors
 {
     public interface ISpriteShatterVBehavior
     {
