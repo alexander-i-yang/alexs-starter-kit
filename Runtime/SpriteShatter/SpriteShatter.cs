@@ -16,30 +16,25 @@ using TriangleNet.Topology;
 
 namespace ASK.Runtime.SpriteShatter
 {
+    [RequireComponent(typeof(SpriteRenderer))]
     public class SpriteShatter : MonoBehaviour
     {
         [SerializeField] private GameObject clone;
 
-        private SpriteRenderer _sprite;
-
-        public Triangle[] d_triangles { get; private set; }
-        public Dictionary<Triangle, int> d_groups { get; private set; }
-        
-        public SpriteRenderer MySpriteRenderer
+        private SpriteRenderer _sr;
+        public SpriteRenderer MySR
         {
             get
             {
-                if (_sprite != null) return _sprite;
-                _sprite = GetComponent<SpriteRenderer>();
-                return _sprite;
+                if (_sr != null) return _sr;
+                _sr = GetComponent<SpriteRenderer>();
+                return _sr;
             }
         }
 
-        public Vector2[] Mesh;
+        public Vector2[] Mesh = new Vector2[0];
 
-        [SerializeField]
-        [PositiveValueOnly]
-        private float MaxTriangleArea = 2;
+        [SerializeField] [PositiveValueOnly] private float MaxTriangleArea = 2;
 
         public void Shatter(
             Vector2 forceWorldOrigin,
@@ -47,29 +42,31 @@ namespace ASK.Runtime.SpriteShatter
             IGrouper grouper,
             ISpriteShatterVBehavior spriteShatterVBehavior)
         {
-            var forceRay = NormalizeWorldForce(forceWorldOrigin, force);
-            
-            Triangulate(grouper, forceRay);
-            var flattenedGroups = FlattenGroups(d_groups);
+            var sprite = MySR.sprite;
+            var forceRay = NormalizeWorldForce(sprite, forceWorldOrigin, force);
+
+            var triangles = Triangulate();
+            var flattenedGroups = CreateFlattenedGroups(triangles, grouper, forceRay);
 
             var pieces = new List<IShatterPiece>();
 
             foreach (var group in flattenedGroups)
             {
                 var p = Game.ParticlePool.ReceiveParticle(
-                    () => CreatePiece(group),
-                    (p) => InitPiece(p, group)
+                    () => CreatePiece(sprite, group),
+                    (p) => InitPiece(sprite, p, group)
                 );
                 pieces.Add(p);
             }
-            
+
             foreach (var piece in pieces)
             {
-                piece.ApplyForce(spriteShatterVBehavior.CalculateVelocity(piece.GetTriangles(), forceWorldOrigin, force));
+                piece.ApplyForce(
+                    spriteShatterVBehavior.CalculateVelocity(piece.GetTriangles(), forceWorldOrigin, force));
             }
         }
 
-        public Triangle[][] FlattenGroups(Dictionary<Triangle, int> groupsLookup)
+        public static Triangle[][] FlattenGroups(Dictionary<Triangle, int> groupsLookup)
         {
             Dictionary<int, List<Triangle>> ret = new();
             foreach (var kv in groupsLookup)
@@ -84,37 +81,41 @@ namespace ASK.Runtime.SpriteShatter
             return ret.Values.Select(l => l.ToArray()).ToArray();
         }
 
-        public IShatterPiece CreatePiece(Triangle[] triangles)
+        public IShatterPiece CreatePiece(Sprite sprite, Triangle[] triangles)
         {
             var clon = Instantiate(clone).GetComponent<IShatterPiece>();
 
             //TODO: look into Sprite.PhysicsShape
 
-            InitPiece(clon, triangles);
+            InitPiece(sprite, clon, triangles);
             return clon;
         }
 
-        public void InitPiece(IShatterPiece p, Triangle[] triangles)
+        public void InitPiece(Sprite sprite, IShatterPiece p, Triangle[] triangles)
         {
-            p.Init(MySpriteRenderer.sprite, triangles);
+            p.Init(sprite, triangles);
             p.transform.position = transform.position;
         }
 
         public void BakeMesh()
         {
-            Mesh = TexToPoly.GetPolygon(MySpriteRenderer.sprite.texture);
+            Mesh = TexToPoly.GetPolygon(MySR.sprite.texture);
         }
 
-        public void Triangulate(IGrouper grouper, Ray2D forceRay)
+        public Triangle[] Triangulate()
         {
-            d_triangles = Triangulator.Triangulate(Mesh, MaxTriangleArea).ToArray();
-            d_groups = grouper.CalculateGroupsLookup(d_triangles, forceRay);
+            return Triangulator.Triangulate(Mesh, MaxTriangleArea).ToArray();
         }
 
-        
-        public Ray2D NormalizeWorldForce(Vector2 bulletPos, Vector2 realBulletv)
+        public Triangle[][] CreateFlattenedGroups(Triangle[] triangles, IGrouper grouper, Ray2D forceRay)
         {
-            Vector2 normalizedPos = Triangulator.Normalize(MySpriteRenderer.sprite, bulletPos-(Vector2)transform.position);
+            var groups = grouper.CalculateGroupsLookup(triangles, forceRay);
+            return FlattenGroups(groups);
+        }
+
+        public Ray2D NormalizeWorldForce(Sprite sprite, Vector2 bulletPos, Vector2 realBulletv)
+        {
+            Vector2 normalizedPos = Triangulator.Normalize(sprite, bulletPos - (Vector2)transform.position);
             return new Ray2D(normalizedPos, realBulletv);
         }
 

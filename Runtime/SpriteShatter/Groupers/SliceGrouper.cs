@@ -34,26 +34,6 @@ namespace ASK.Runtime.SpriteShatter.Groupers
                 
                 groupsLookup.Add(triangle, groupNum);
                 groupNum++;
-                continue;
-                
-                /*Queue<Triangle> q = new Queue<Triangle>();
-                triangle.neighbors.ForEach(o => q.Enqueue(o.Triangle));
-                
-                while (q.Count > 0)
-                {
-                    var groupTriangle = q.Dequeue();
-                    if (groupTriangle == null || groupTriangle.ID < 0 || groupsLookup.ContainsKey(groupTriangle)) continue;
-                    
-                    distanceFromLine = HandleUtility.DistancePointLine(triangle.Center(), l1, l2);
-                    float prob = distanceFromLine*2;
-                    if (UnityEngine.Random.value > prob) continue;
-                    
-                    groupTriangle.neighbors.ForEach(o => q.Enqueue(o.Triangle));
-                    
-                    groupsLookup.Add(groupTriangle, groupNum);
-                }
-
-                groupNum++;*/
             }
 
             return groupsLookup;
