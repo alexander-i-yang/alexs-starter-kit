@@ -19,18 +19,18 @@ namespace ASK.Runtime.SpriteShatter
         [SerializeField] public Triangle[] Triangles;
         [SerializeField] public SpriteShatterGroup[] Groups;
 
-        [SerializeReference]
-        #if UNITY_EDITOR
-        [ChilrdenClassesDropdown(typeof(ISpriteShatterVBehavior))]
-        #endif
-        private ISpriteShatterVBehavior spriteShatterVBehavior;
-
         [FormerlySerializedAs("d_grouper")]
         [SerializeReference]
         #if UNITY_EDITOR
         [ChilrdenClassesDropdown(typeof(IGrouper))]
         #endif
         private IGrouper grouper;
+        
+        [SerializeReference]
+        #if UNITY_EDITOR
+        [ChilrdenClassesDropdown(typeof(ISpriteShatterVBehavior))]
+        #endif
+        private ISpriteShatterVBehavior spriteShatterVBehavior;
 
         public int NumGroups => Groups == null ? 0 : Groups.Length;
 

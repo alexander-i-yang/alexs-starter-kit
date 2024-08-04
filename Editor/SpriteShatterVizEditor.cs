@@ -11,7 +11,8 @@ namespace ASK.Runtime.SpriteShatter
     [CustomEditor(typeof(SpriteShatterViz))]
     public class SpriteShatterVizEditor : UnityEditor.Editor
     {
-        private int selectedGroup;
+        private int selectedGroup = -1;
+        private bool normalizeVelocityViz;
         
         public override void OnInspectorGUI()
         {
@@ -22,6 +23,7 @@ namespace ASK.Runtime.SpriteShatter
             using (var check = new EditorGUI.ChangeCheckScope())
             {
                 selectedGroup = EditorGUILayout.IntSlider("Selected Group", selectedGroup, -1, t.NumGroups);
+                normalizeVelocityViz = EditorGUILayout.Toggle("Cap Velocity Viz", normalizeVelocityViz);
                 if (check.changed) SceneView.RepaintAll();
             }
 
@@ -89,21 +91,25 @@ namespace ASK.Runtime.SpriteShatter
 
         public void DrawVelocities(Vector3 tPos, SpriteShatterGroup[] groups)
         {
-            if (selectedGroup == -1)
+            void DrawGroup(SpriteShatterGroup group)
             {
-                
+                Vector3 p0 = (Vector3)group.Center + tPos;
+                Vector3 velocity = normalizeVelocityViz ? group.velocity.normalized : (Vector3)group.velocity;
+                Vector3 p1 = (Vector3)group.Center + tPos + velocity;
+
+                Handles.color = Color.yellow;
+                Handles.DrawLine(p0, p1, 2);
+            }
+            
+            if (selectedGroup < 0)
+            {
+                foreach (var group in groups)
+                    DrawGroup(group);
             }
             else
             {
-                /*if (flattened.Length <= selectedGroup) return;
-                var triangles = flattened[selectedGroup];
-                var center = triangles.Select(t => t.Center()).Average();
-                Vector2 appliedForce = spriteShatterVBehavior.CalculateVelocity(triangles, ForcePos, Force);
-                Helper.DrawArrow(
-                    (Vector3)center + tPos,
-                    appliedForce,
-                    Color.yellow,
-                    0);*/
+                var group = groups[selectedGroup];
+                DrawGroup(group);
             }
         }
     }
