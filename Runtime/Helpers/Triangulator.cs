@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ASK.Helpers;
+using ASK.Runtime.SpriteShatter;
 using Clipper2Lib;
 using TriangleNet.Geometry;
 using TriangleNet.Meshing;
@@ -34,6 +35,17 @@ namespace ASK.Runtime.Helpers
             return poly.Triangulate(options, quality).Triangles;
         }
 
+        public static void DrawGroups(SpriteShatterGroup[] groups, Vector3 offset = default, float[] colors = null)
+        {
+            for (var i = 0; i < groups.Length; i++)
+            {
+                var group = groups[i];
+                var color = colors == null ? 0 : colors[i];
+                var groupColors = group.Triangles.Select(_ => color).ToArray();
+                DrawTriangles(group.Triangles.ToArray(), offset, groupColors);
+            }
+        }
+        
         public static void DrawTriangles(Triangle[] triangles, Vector3 offset = default, float[] colors = null)
         {
             var tri = triangles.Select(t => t.vertices).ToArray();
@@ -81,7 +93,6 @@ namespace ASK.Runtime.Helpers
 
         public static Vertex Normalize(Sprite sprite, Vertex v)
         {
-            Vector2 extents = sprite.bounds.extents;
             return Normalize(sprite, v.ToVector2()).ToVertex();
         }
 

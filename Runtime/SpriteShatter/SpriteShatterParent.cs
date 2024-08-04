@@ -12,7 +12,7 @@ namespace ASK.Runtime.SpriteShatter
 {
     public abstract class IShatterPiece : Particle
     {
-        public abstract void Init(Sprite sprite, Triangle[] triangles);
+        public abstract void Init(Sprite sprite, SpriteShatterGroup groupData);
         public abstract void ApplyForce(Vector2 force);
         public abstract Triangle[] GetTriangles();
     }
@@ -38,25 +38,18 @@ namespace ASK.Runtime.SpriteShatter
         private float awakeTime;
         private List<SpriteRenderer> _srs;
         
-        public override void Init(Sprite sprite, Triangle[] triangles)
+        public override void Init(Sprite sprite, SpriteShatterGroup groupData)
         {
             _rb = GetComponent<Rigidbody2D>();
-            _triangles = triangles;
+            _triangles = groupData.Triangles.ToArray();
             gameObject.SetActive(true);
             //Paths64 paths = new Paths64();
             _srs = new List<SpriteRenderer>();
 
-            foreach (var triangle in triangles)
+            foreach (var triangle in _triangles)
             {
                 var newObj =
                     Instantiate(spriteShatterPiece, transform.position, Quaternion.identity, transform);
-
-                /*paths.Add(new Path64(new Point64[]
-                {
-                    triangle.A.ToPoint64(),
-                    triangle.B.ToPoint64(),
-                    triangle.C.ToPoint64()
-                }));*/
                 
                 var col = newObj.GetComponent<PolygonCollider2D>();
                 col.points = triangle.Points().ToArray();
@@ -73,10 +66,9 @@ namespace ASK.Runtime.SpriteShatter
                 sr.material.SetVector(B, normaB);
                 sr.material.SetVector(C, normaC);
             }
+
+            ApplyForce(groupData.velocity);
             
-            /*var ret = Clipper2Lib.Clipper.Union(paths, FillRule.Positive);
-            Vector2[] v = ret[0].ToVectors();
-            gameObject.GetComponent<PolygonCollider2D>().points = v;*/
             awakeTime = Game.TimeManager.Time;
         }
 
