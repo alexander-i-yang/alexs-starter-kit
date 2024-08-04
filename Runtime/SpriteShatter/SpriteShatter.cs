@@ -13,9 +13,18 @@ using ASK.Runtime.SpriteShatter.VBehaviors;
 using UnityEngine;
 using MyBox;
 using TriangleNet.Topology;
+using UnityEngine.Serialization;
 
 namespace ASK.Runtime.SpriteShatter
 {
+    [Serializable]
+    public struct SpriteShatterGroup
+    {
+        [FormerlySerializedAs("triangles")] public List<Triangle> Triangles;
+        public Vector2 velocity;
+        public Vector2 Center => Triangles.Select(t => t.Center()).Average();
+    }
+    
     [RequireComponent(typeof(SpriteRenderer))]
     public class SpriteShatter : MonoBehaviour
     {
@@ -43,11 +52,10 @@ namespace ASK.Runtime.SpriteShatter
             ISpriteShatterVBehavior spriteShatterVBehavior)
         {
             var sprite = MySR.sprite;
-            var forceRay = NormalizeWorldForce(sprite, forceWorldOrigin, force);
 
             var triangles = Triangulate();
-            var flattenedGroups = CreateFlattenedGroups(triangles, grouper, forceRay);
-
+            var flattenedGroups = CreateGroups(triangles, grouper, spriteShatterVBehavior, forceWorldOrigin, force);
+            
             var pieces = new List<IShatterPiece>();
 
             foreach (var group in flattenedGroups)
@@ -58,42 +66,59 @@ namespace ASK.Runtime.SpriteShatter
                 );
                 pieces.Add(p);
             }
-
-            foreach (var piece in pieces)
-            {
-                piece.ApplyForce(
-                    spriteShatterVBehavior.CalculateVelocity(piece.GetTriangles(), forceWorldOrigin, force));
-            }
         }
 
-        public static Triangle[][] FlattenGroups(Dictionary<Triangle, int> groupsLookup)
+        public SpriteShatterGroup[] CreateGroups(
+            Triangle[] triangles,
+            IGrouper grouper,
+            ISpriteShatterVBehavior spriteShatterVBehavior,
+            Vector2 forceWorldOrigin,
+            Vector2 force
+            )
         {
-            Dictionary<int, List<Triangle>> ret = new();
+            var sprite = MySR.sprite;
+
+            var forceRay = NormalizeWorldForce(sprite, forceWorldOrigin, force);
+            var groupsLookup = grouper.CalculateGroupsLookup(triangles, forceRay);
+            var flattenedGroups = FlattenGroups(groupsLookup);
+            for (var i = 0; i < flattenedGroups.Length; i++)
+            {
+                var groupTriangles = flattenedGroups[i].Triangles;
+                Vector2 v = spriteShatterVBehavior.CalculateVelocity(groupTriangles, forceWorldOrigin, force);
+                flattenedGroups[i].velocity = v;
+            }
+
+            return flattenedGroups;
+        }
+
+        public static SpriteShatterGroup[] FlattenGroups(Dictionary<Triangle, int> groupsLookup)
+        {
+            SpriteShatterGroup[] ret = new SpriteShatterGroup[groupsLookup.Values.Max()+1];
             foreach (var kv in groupsLookup)
             {
                 var tri = kv.Key;
-                var group = kv.Value;
+                var groupInd = kv.Value;
+                var triangles = ret[groupInd].Triangles;
 
-                if (!ret.ContainsKey(group)) ret[group] = new();
-                ret[group].Add(tri);
+                if (triangles == null) triangles = new ();
+                triangles.Add(tri);
+                ret[groupInd].Triangles = triangles;
             }
 
-            return ret.Values.Select(l => l.ToArray()).ToArray();
+            return ret.Where(t => t.Triangles != null).ToArray();
         }
 
-        public IShatterPiece CreatePiece(Sprite sprite, Triangle[] triangles)
+        public IShatterPiece CreatePiece(Sprite sprite, SpriteShatterGroup group)
         {
             var clon = Instantiate(clone).GetComponent<IShatterPiece>();
 
-            //TODO: look into Sprite.PhysicsShape
-
-            InitPiece(sprite, clon, triangles);
+            InitPiece(sprite, clon, group);
             return clon;
         }
 
-        public void InitPiece(Sprite sprite, IShatterPiece p, Triangle[] triangles)
+        public void InitPiece(Sprite sprite, IShatterPiece p, SpriteShatterGroup group)
         {
-            p.Init(sprite, triangles);
+            p.Init(sprite, group);
             p.transform.position = transform.position;
         }
 
@@ -107,16 +132,11 @@ namespace ASK.Runtime.SpriteShatter
             return Triangulator.Triangulate(Mesh, MaxTriangleArea).ToArray();
         }
 
-        public Triangle[][] CreateFlattenedGroups(Triangle[] triangles, IGrouper grouper, Ray2D forceRay)
+        public Ray2D NormalizeWorldForce(Sprite sprite, Vector2 forcePos, Vector2 velocity)
         {
-            var groups = grouper.CalculateGroupsLookup(triangles, forceRay);
-            return FlattenGroups(groups);
-        }
-
-        public Ray2D NormalizeWorldForce(Sprite sprite, Vector2 bulletPos, Vector2 realBulletv)
-        {
-            Vector2 normalizedPos = Triangulator.Normalize(sprite, bulletPos - (Vector2)transform.position);
-            return new Ray2D(normalizedPos, realBulletv);
+            forcePos -= (Vector2)transform.position;
+            //forcePos = Triangulator.Normalize(sprite, forcePos);
+            return new Ray2D(forcePos, velocity);
         }
 
         public Vector3[] GetDrawableMesh()
