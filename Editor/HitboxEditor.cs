@@ -100,6 +100,7 @@ namespace ASK.Editor
                 newPos = newPos.Snap(_snapBy);
                 Undo.RecordObject(this, "Change hitbox bounds");
                 updateFunction(newPos);
+                EditorUtility.SetDirty(_hitbox);
             }
         }
     }
