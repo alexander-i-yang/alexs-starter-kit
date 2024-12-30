@@ -54,9 +54,10 @@ namespace ASK.Editor
             if (GUILayout.Button("Sync"))
             {
                 var col = _hitbox.GetComponent<BoxCollider2D>();
-                col.size = _hitbox.Bounds.size;
+                if (col) col.size = _hitbox.Bounds.size;
+                
                 var sr = _hitbox.GetComponentInChildren<SpriteRenderer>();
-                sr.transform.localScale = _hitbox.Bounds.size / new Vector2(8, 8); 
+                if (sr) sr.transform.localScale = _hitbox.Bounds.size / new Vector2(8, 8); 
             }
         }
 

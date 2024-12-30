@@ -12,12 +12,10 @@ GameObject:
   - component: {fileID: 1593220096949059128}
   - component: {fileID: 4879817404993205468}
   - component: {fileID: 2702945297104255067}
-  - component: {fileID: 5641120745133576687}
   - component: {fileID: 9133028208413528261}
   - component: {fileID: 4009438112016523511}
   - component: {fileID: 5453386725962513318}
   - component: {fileID: 7779518960555592983}
-  - component: {fileID: 6796168585874671989}
   - component: {fileID: 676945408810749066}
   - component: {fileID: 4926454784103772785}
   m_Layer: 11
@@ -70,10 +68,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Bounds>k__BackingField:
     serializedVersion: 2
-    x: -8
-    y: -8
-    width: 16
-    height: 16
+    x: -4
+    y: -4
+    width: 8
+    height: 8
 --- !u!114 &2702945297104255067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,30 +119,6 @@ MonoBehaviour:
       data:
         xV: 80
         accel: 1500
---- !u!114 &5641120745133576687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3469753410705410558}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6eca0a30e2c452dad0269d3bedde45e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  timeScale: 0.25
-  previewBounce: 10
-  bulletObj: {fileID: 5436780625047717047, guid: 945cd900eef69c74e961aca63f83bf1e, type: 3}
-  BulletSpeed: 10000
-  _rifleSR: {fileID: 0}
-  recoil: 50
-  casing: {fileID: 2299234963451285489, guid: dffa078fcab82e04cb91f81491eef286, type: 3}
-  casingDelay0: 0.2
-  casingDelay1: 0.3
-  reloadDuration: 1.5
-  audio: {fileID: 0}
-  pitchShift: 0.125
 --- !u!114 &9133028208413528261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -198,18 +172,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 228323253c0c4236b4cb3d6603e2b439, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &6796168585874671989
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3469753410705410558}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56b7f809bbce49619c9599a326bd5d4f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!61 &676945408810749066
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -253,7 +215,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 16, y: 16}
+  m_Size: {x: 8, y: 8}
   m_EdgeRadius: 0
 --- !u!50 &4926454784103772785
 Rigidbody2D:
@@ -391,8 +353,8 @@ Transform:
   m_GameObject: {fileID: 8120054967589390949}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -8, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2166037192124765445}
@@ -469,13 +431,13 @@ MonoBehaviour:
   m_SelfShadows: 0
   m_ApplyToSortingLayers: 00000000d33988a63538e49fc3617f2d1b6d2e45a94361bf
   m_ShapePath:
-  - {x: -8, y: 0, z: 0}
-  - {x: -8, y: 16, z: 0}
-  - {x: 8, y: 16, z: 0}
-  - {x: 8, y: 0, z: 0}
-  m_ShapePathHash: 0
+  - {x: -4, y: -4, z: 0}
+  - {x: -4, y: 4, z: 0}
+  - {x: 4, y: 4, z: 0}
+  - {x: 4, y: -4, z: 0}
+  m_ShapePathHash: -2087324395
   m_Mesh: {fileID: 0}
-  m_InstanceId: 34376
+  m_InstanceId: 36352
   m_LocalBounds:
-    m_Center: {x: 0, y: 8, z: 0}
-    m_Extent: {x: 8, y: 8, z: 0}
+    m_Center: {x: 0, y: 0, z: 0}
+    m_Extent: {x: 4, y: 4, z: 0}
