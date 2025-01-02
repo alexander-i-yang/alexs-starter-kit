@@ -52,12 +52,6 @@ namespace ASK.Runtime.Phys2D
             _properties = GetComponents<PhysProperty>();
             _collisionModules = GetComponents<CollisionBehavior>();
         }
-
-        private void Update()
-        {
-            _physState.jumpPressed = Input.GetKeyDown(KeyCode.Z) || Input.GetKeyDown(KeyCode.Space) ||
-                                     Input.GetKeyDown(KeyCode.W);
-        }
         
         private void FixedUpdate()
         {

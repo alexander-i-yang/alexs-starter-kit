@@ -77,16 +77,10 @@ MonoBehaviour:
     jumpPressed: 0
     stun: 0
     inv: 0
-  _physModules:
-  - rid: 1587891711038717963
+  _physModules: []
   references:
     version: 2
-    RefIds:
-    - rid: 1587891711038717963
-      type: {class: TestPhysBehavior, ns: Test, asm: Assembly-CSharp}
-      data:
-        Velocity: {x: 0, y: 5}
-        Enabled: 0
+    RefIds: []
 --- !u!114 &1234084112512072885
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,7 +264,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 7bae244db4282ce4294003a92b38f658, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.509434, g: 0.509434, b: 0.509434, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -306,7 +300,7 @@ MonoBehaviour:
   - {x: 4, y: 4, z: 0}
   m_ShapePathHash: -2087324395
   m_Mesh: {fileID: 0}
-  m_InstanceId: 35998
+  m_InstanceId: 34784
   m_LocalBounds:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 4, y: 4, z: 0}

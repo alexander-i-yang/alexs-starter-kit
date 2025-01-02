@@ -76,8 +76,8 @@ namespace ASK.Runtime.SpriteShatter
         {
             if (_rb == null) return;
             
-            if (_rb.velocity.magnitude < 0.0001f)
-                _rb.velocity = Vector2.zero;
+            if (_rb.linearVelocity.magnitude < 0.0001f)
+                _rb.linearVelocity = Vector2.zero;
         }
 
         void Update()

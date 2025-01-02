@@ -27,7 +27,7 @@ namespace ASK.Runtime.Phys2D.Defaults
         /*[SerializeField]
         protected Vector2 direction;*/
 
-        public PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj[]> surroundings)
+        public PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj<PhysState>[]> surroundings)
         {
             var surroundingsDown = surroundings[Direction.Down];
             
