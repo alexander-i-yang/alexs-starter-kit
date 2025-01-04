@@ -9,7 +9,7 @@ namespace ASK.Editor.Standalone
     public class ChilrdenClassesDropdown : PropertyAttribute
     {
         public List<Type> Types { get; private set; }
-
+        
         public ChilrdenClassesDropdown(Type t)
         {
             Types = EditorReflection.ImplementableTypes(t).ToList();

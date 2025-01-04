@@ -1,10 +1,14 @@
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using ASK.Runtime.Core;
+using UnityEngine;
 
 namespace ASK.Runtime.Phys2D.Behaviors
 {
-    public interface IPhysBehavior
+    [Serializable]
+    public abstract class IPhysBehavior
     {
-        public PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj[]> surroundings);
+        public abstract PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj[]> surroundings);
     }
 }

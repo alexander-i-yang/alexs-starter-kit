@@ -18,7 +18,7 @@ namespace ASK.Runtime.Phys2D.Defaults
          */
         // protected bool FloorStopped(PhysState p) => p.prevRidingV != Vector2.zero && p.ridingOn != null && p.ridingOn.velocity == Vector2.zero;
         
-        public PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj[]> surroundings)
+        public override PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj[]> surroundings)
         {
             p.ridingOn = Riding(surroundings[Direction.Down]);
             return p;

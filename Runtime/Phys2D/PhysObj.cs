@@ -8,7 +8,10 @@ using ASK.Editor.Standalone;
 #endif
 using ASK.Runtime.Phys2D.Behaviors;
 using ASK.Runtime.Phys2D.Defaults;
+using MyBox;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ASK.Runtime.Phys2D
 {
@@ -16,20 +19,9 @@ namespace ASK.Runtime.Phys2D
     public abstract class PhysObj : MonoBehaviour
     {
         private Hitbox _myHitbox;
-        [SerializeField] private PhysState _physState;
-
-        [SerializeReference]
-        #if UNITY_EDITOR
-        [ChilrdenClassesDropdown(typeof(IPhysBehavior))]
-        #endif
-        private IPhysBehavior[] _physModules =
-        {
-            new GravityPhysBehavior()
-        };
-
-        //[SerializeReference]
-        //[ChilrdenClassesDropdown(typeof(CollisionBehavior))]
-        private CollisionBehavior[] _collisionModules;
+        
+        [SerializeField]
+        private PhysObjStrategy _physObjStrategy = new();
 
         private PhysProperty[] _properties;
 
@@ -43,29 +35,23 @@ namespace ASK.Runtime.Phys2D
                 return _myHitbox;
             }
         }
-
-        [SerializeField] public Vector2 SubPixels { get; private set; } = Vector2.zero;
+        
+        public Vector2 SubPixels { get; private set; } = Vector2.zero;
 
         private void Awake()
         {
             _squishBehavior = GetComponent<ISquishBehavior>();
             _properties = GetComponents<PhysProperty>();
-            _collisionModules = GetComponents<CollisionBehavior>();
         }
         
         private void FixedUpdate()
         {
             // if (SelectedInEditor()) return;
-            
-            _physState = ResetPhysState(_physState);
-            var surroundings = GetSurroundings();
-            foreach (var module in _physModules)
-            {
-                if (module == null) continue;
-                _physState = module.ProcessSurroundings(_physState, surroundings);
-            }
 
-            Move(_physState.velocity * Game.TimeManager.FixedDeltaTime);
+            var surroundings = GetSurroundings();
+            Vector2 velocity = _physObjStrategy.Process(surroundings);
+
+            Move(velocity * Game.TimeManager.FixedDeltaTime);
         }
 
         private Dictionary<Direction, PhysObj[]> GetSurroundings()
@@ -78,16 +64,6 @@ namespace ASK.Runtime.Phys2D
                 { Direction.Down, CheckCollisions(Vector2.down) },
             };
         }
-
-        /*public float velocityY {
-            get { return _physState.velocity.y; }
-            protected set { _physState.velocity = new Vector2(_physState.velocity.x, value); }
-        }
-
-        public float velocityX {
-            get { return _physState.velocity.x; }
-            protected set { _physState.velocity = new Vector2(value, _physState.velocity.y); }
-        }*/
 
         /// <summary>
         /// See CheckCollisions<T>
@@ -161,12 +137,7 @@ namespace ASK.Runtime.Phys2D
         {
             if (p == this) return false;
             p.OnCollideWith(this, direction);
-            foreach (var module in _collisionModules)
-            {
-                _physState = module.OnCollide(_physState, p, direction);
-            }
-
-            return _physState.collided;
+            return _physObjStrategy.OnCollide(p, direction);
         }
 
         /*public virtual bool PlayerCollide(Actor p, Vector2 direction) {
@@ -178,30 +149,12 @@ namespace ASK.Runtime.Phys2D
         {
             return FindObjectsOfType<Actor>();
         }
-        
-        public bool IsRiding(PhysObj p) => _physState.ridingOn.Contains(p);
+
+        public bool IsRiding(PhysObj p) => _physObjStrategy.IsRiding(p);
 
         public bool Squish(PhysObj p, Vector2 d) => _squishBehavior.Squish(p, d);
         
-        private PhysState ResetPhysState(PhysState p)
-        {
-            p.collided = false;
-            p.grounded = false;
-            if (p.stun > 0) p.stun = Math.Max(0, p.stun - Game.TimeManager.FixedDeltaTime);
-            if (p.inv > 0) p.inv = Math.Max(0, p.inv - Game.TimeManager.FixedDeltaTime);
-            return p;
-        }
-        
         public void Ride(Vector2 direction) => Move(direction);
-
-        #if UNITY_EDITOR
-        private void OnDrawGizmosSelected()
-        {
-            
-            UnityEditor.Handles.Label(transform.position,
-                $"Velocity: <{(int)_physState.velocity.x}, {(int)_physState.velocity.y}>");
-        }
-        #endif
 
         /*private bool SelectedInEditor()
         {
@@ -236,14 +189,17 @@ namespace ASK.Runtime.Phys2D
 
             return default;
         }
+
+        /*public Vector2 GetVelocity() => _physState.velocity;
+
+        public PhysState PhysState => _physState;*/
         
-        public void SetVelocity(Vector2 v)
+        #if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
         {
-            _physState.velocity = v;
+            UnityEditor.Handles.Label(transform.position,
+                $"Velocity: <{(int)_physObjStrategy.Velocity().x}, {(int)_physObjStrategy.Velocity().y}>");
         }
-
-        public Vector2 GetVelocity() => _physState.velocity;
-
-        public PhysState PhysState => _physState;
+        #endif
     }
 }

@@ -6,11 +6,9 @@ using ASK.Runtime.Core;
 using ASK.Runtime.Phys2D.Behaviors;
 using MyBox;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace ASK.Runtime.Phys2D.Defaults
 {
-    [Serializable]
     public class GravityPhysBehavior : IPhysBehavior
     {
         [SerializeField]
@@ -27,7 +25,7 @@ namespace ASK.Runtime.Phys2D.Defaults
         /*[SerializeField]
         protected Vector2 direction;*/
 
-        public PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj<PhysState>[]> surroundings)
+        public override PhysState ProcessSurroundings(PhysState p, Dictionary<Direction, PhysObj[]> surroundings)
         {
             var surroundingsDown = surroundings[Direction.Down];
             

@@ -57,7 +57,9 @@ namespace ASK.Editor
                 if (col) col.size = _hitbox.Bounds.size;
                 
                 var sr = _hitbox.GetComponentInChildren<SpriteRenderer>();
-                if (sr) sr.transform.localScale = _hitbox.Bounds.size / new Vector2(8, 8); 
+                if (sr) sr.transform.localScale = _hitbox.Bounds.size / new Vector2(8, 8);
+                
+                EditorUtility.SetDirty(_hitbox);
             }
         }
 

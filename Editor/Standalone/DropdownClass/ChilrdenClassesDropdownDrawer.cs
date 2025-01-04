@@ -138,6 +138,7 @@ namespace ASK.Editor.Standalone
         {
             if (index == 0) return null;
             Type t = Types[index - 1];
+            
             return Activator.CreateInstance(t);
         }
 
